@@ -40,6 +40,8 @@ Seções usadas: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`
 - Template de pull request.
 - Revisão automática por CodeRabbit nos PRs para `dev` e `release`, com as regras do projeto por
   diretório. Complementa a revisão humana exigida pelo RNF06, não substitui.
+- `CODEOWNERS` pedindo revisão automaticamente, com dono explícito nos caminhos sensíveis: baseline
+  do portão, workflows, ADRs, schema e os arquivos mantidos pelo responsável técnico.
 
 ### Segurança
 

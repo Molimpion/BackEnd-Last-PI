@@ -79,6 +79,7 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `.github/workflows/ci.yml`         | Job `quality`. Roda em PR e push para `dev`, `release` e `main`                                        |
 | `.github/pull_request_template.md` | Checklist que aparece na descrição de todo PR                                                          |
 | `.coderabbit.yaml`                 | Revisão automática por bot nos PRs para `dev` e `release`. Complementa a revisão humana, não substitui |
+| `.github/CODEOWNERS`               | Quem é pedido para revisar conforme os arquivos tocados. Caminhos sensíveis têm dono explícito         |
 | `.gitignore`                       | O que não é versionado                                                                                 |
 
 ## Empacotar o repositório para uma IA

@@ -83,7 +83,18 @@ O hook de `pre-commit` roda formatação e tipos, mas hooks podem ser ignorados 
 
 ## Quem revisa o seu PR
 
-Duas coisas acontecem quando você abre um PR, e elas não se substituem.
+Três coisas acontecem quando você abre um PR, e elas não se substituem.
+
+**O revisor é pedido automaticamente.** O [`.github/CODEOWNERS`](./.github/CODEOWNERS) define quem é
+notificado conforme os arquivos que você tocou. Alguns caminhos são sensíveis e têm dono explícito:
+
+| Caminho                                            | Por que tem dono                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------- |
+| `quality-baseline.json`, `scripts/quality-gate.ts` | Afrouxar o portão precisa ser decisão visível, não gesto silencioso |
+| `.github/workflows/`                               | O nome do job `quality` é contrato com a proteção de branch         |
+| `CHANGELOG.md`, `CONTEXT.md`                       | São mantidos pelo responsável técnico                               |
+| `docs/adr/`                                        | ADR aceito não se edita para mudar de ideia — escreve-se um novo    |
+| `prisma/`, `docs/modelagem.md`                     | Mudança de schema afeta todo mundo e o front                        |
 
 **O CodeRabbit revisa automaticamente.** É um bot, configurado em
 [`.coderabbit.yaml`](./.coderabbit.yaml), que conhece as regras deste repositório — fronteira de
