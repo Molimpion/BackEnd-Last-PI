@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, release, main]
+  push:
+    branches: [dev, release, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: matchmaking
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d matchmaking"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      PORT: 3333
+      APP_URL: http://localhost:3333
+      FRONTEND_ORIGIN: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/matchmaking?schema=public
+      REDIS_URL: redis://localhost:6379
+      MAIL_FROM: ci@exemplo.invalid
+      AI_SERVICE_URL: http://localhost:8000
+      LOG_LEVEL: error
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Gerar segredo efemero de sessao
+        run: echo "SESSION_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Aplicar migrations
+        run: npm run db:deploy
+
+      - name: Formatacao
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build
+
+      - name: Portao de qualidade
+        run: npm run quality
+
+      - name: Publicar relatorio de cobertura
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage/
+          retention-days: 7

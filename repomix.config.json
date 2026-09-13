@@ -1,0 +1,43 @@
+{
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "removeEmptyLines": true,
+    "showLineNumbers": true,
+    "instructionFilePath": "CONTEXT.md"
+  },
+  "include": [
+    "CLAUDE.md",
+    "docs/modelagem.md",
+    "docs/adr/README.md",
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "scripts/**/*.ts",
+    "prisma/schema.prisma",
+    "prisma.config.ts",
+    "package.json",
+    "tsconfig*.json",
+    "eslint.config.js",
+    "vitest.config.ts",
+    "docker-compose.yml",
+    ".env.example"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "repomix-output.*",
+      "*.lock",
+      "package-lock.json",
+      "*.log",
+      "dist/",
+      "build/",
+      ".next/",
+      "coverage/",
+      "src/generated/"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
