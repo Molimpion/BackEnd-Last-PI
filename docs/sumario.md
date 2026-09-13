@@ -28,7 +28,7 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `docs/modelagem.md`            | Modelo de dados proposto e os oito pontos que bloqueiam a primeira migration                            |
 | `docs/perguntas-frequentes.md` | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                  |
 | `docs/adr/README.md`           | Índice dos ADRs, agrupado por tema                                                                      |
-| `docs/adr/0001` a `0022`       | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                     |
+| `docs/adr/0001` a `0023`       | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                     |
 | `LICENSE`                      | Licença MIT                                                                                             |
 
 ## Código
@@ -46,6 +46,7 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `src/infra/errors.ts`     | `AppError`, os erros nomeados e o middleware que traduz erro em resposta HTTP                                                                                                    |
 | `src/generated/`          | Cliente Prisma **gerado**. Não versionado, não editar                                                                                                                            |
 | `tests/health.test.ts`    | Verifica que `GET /health` responde 200                                                                                                                                          |
+| `tests/errors.test.ts`    | Cobre os erros nomeados e o tratador, incluindo que a mensagem original do erro nao tratado nao vaza para o cliente                                                              |
 | `scripts/quality-gate.ts` | O portão de qualidade. Sete verificações, sem curto-circuito, falhando fechado                                                                                                   |
 
 ## Configuração
@@ -79,6 +80,7 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `.github/workflows/ci.yml`         | Job `quality`. Roda em PR e push para `dev`, `release` e `main`                                        |
 | `.github/pull_request_template.md` | Checklist que aparece na descrição de todo PR                                                          |
 | `.coderabbit.yaml`                 | Revisão automática por bot nos PRs para `dev` e `release`. Complementa a revisão humana, não substitui |
+| `.github/CODEOWNERS`               | Quem é pedido para revisar conforme os arquivos tocados. Caminhos sensíveis têm dono explícito         |
 | `.gitignore`                       | O que não é versionado                                                                                 |
 
 ## Empacotar o repositório para uma IA
