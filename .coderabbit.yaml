@@ -1,0 +1,48 @@
+language: pt-BR
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - dev
+      - release
+  path_filters:
+    - "!src/generated/**"
+    - "!package-lock.json"
+    - "!dist/**"
+    - "!coverage/**"
+  path_instructions:
+    - path: "src/features/**"
+      instructions: >-
+        A dependencia aponta para dentro: controller conhece o caso de uso, o caso de uso conhece o
+        repositorio, nunca o contrario. O controller e a unica camada que conhece HTTP e nao contem
+        regra de negocio. O repository e a unica que conhece Prisma. Validacao com Zod acontece
+        apenas na borda, no DTO; abaixo dela o dado ja e confiavel e nao se revalida. Entidade de
+        persistencia nunca cruza para o transporte: request e response sao separados da entidade.
+    - path: "src/**"
+      instructions: >-
+        Codigo sem comentarios. Identificadores em portugues sem acento. Proibido `any` e `as any`.
+        Nao existe `utils/` nem `types.ts` global: o transversal mora em `src/infra/` com nome que
+        diz o que faz. Sinalize condicao, validacao, limite ou valor padrao que mude o comportamento
+        do sistema e que nao esteja no `Projeto_Matchmaking.md` — especialmente pesos do score,
+        valores de cota, precos de plano e prazo da janela de tolerancia, que ainda nao foram
+        definidos.
+    - path: "tests/**"
+      instructions: >-
+        Nome de teste descreve comportamento, nao implementacao. `.skip` e `.only` sao proibidos.
+        Nos cinco fluxos criticos do RNF07 — autenticacao e sessao, matchmaking, cota, assinatura e
+        webhook, acesso a dados protegidos — o teste precisa ser de integracao contra PostgreSQL e
+        Redis reais, nao unitario com dependencia mockada.
+    - path: "prisma/schema.prisma"
+      instructions: >-
+        Confira contra `docs/modelagem.md`. Segmento, estagio, ticket e tese sao listas fechadas.
+        Nenhuma entidade participante de interacao pode ser excluida fisicamente: o RF14 exige
+        anonimizacao.
+
+chat:
+  auto_reply: true
