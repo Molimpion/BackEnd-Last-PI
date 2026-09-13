@@ -23,12 +23,23 @@ Verificado rodando:
 - `npm run quality` aprovando as sete verificações. Testado também que reprova: arquivo com `any`,
   `as any` e `@ts-expect-error` derrubou cinco verificações de uma vez, sem curto-circuito, e base
   de comparação inexistente reprovou como `NAO EXECUTOU`.
-- `npm run build`, `typecheck`, `lint`, `format:check` e a suíte (1 teste).
+- `npm run build`, `typecheck`, `lint`, `format:check` e a suíte (7 testes).
 - `npm run context` empacotando o repositório, com security check limpo e sem `.env` no pacote.
 - `npm run changelog:draft` agrupando commits convencionais por tipo.
+- **O CI rodou no GitHub Actions e passou**, em PR para `dev`, `release` e `main`. Dois fatos que
+  eram incerteza viraram evidência: `prisma migrate deploy` sai com código 0 quando não existe
+  migration, e a cobertura do diff mede corretamente — reprovou a 46,5% e aprovou a 81,4% depois dos
+  testes de `errors.ts`.
+- **O fluxo `feature → dev → release → main` foi percorrido inteiro** (PRs #1, #2 e #3), com a
+  proteção de branch já ativa.
 
-**Nunca executado:** o `docker-compose.yml` e o workflow de CI. Não há Docker neste devcontainer até
-o rebuild com a feature `docker-in-docker`, e Actions não roda localmente.
+**Nunca executado:** o `docker-compose.yml`. Não há Docker neste devcontainer até o rebuild com a
+feature `docker-in-docker`.
+
+**Configuração do repositório:** público, com proteção em `main`, `release` e `dev` — job `quality`
+como _required status check_, `strict` ligado, `enforce_admins` ligado, sem force push e sem
+deleção. Revisão obrigatória está em **zero aprovações**, porque o GitHub não permite aprovar o
+próprio PR e hoje há um único revisor.
 
 **Não existe ainda:** model no `prisma/schema.prisma`, migration, `src/features/`, sessão,
 autenticação, especificação OpenAPI.
@@ -67,14 +78,19 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
   `@prisma/config` — funciona hoje (verificado com `generate`, `validate` e `migrate status`), mas
   precisa ser reconferido a cada atualização do Prisma. Ver
   [ADR 0023](./docs/adr/0023-overrides-para-dependencias-transitivas.md).
-- **A aritmética da cobertura do diff nunca foi exercitada.** Com `src/` ainda untracked, o
-  `git diff` não retorna nada e a verificação cai em `N/A`. O primeiro PR é o teste real.
-- **O passo `Aplicar migrations` do CI é o candidato a quebrar na primeira rodada**, porque roda
-  `prisma migrate deploy` sem existir nenhuma migration.
 - **O nome do job `quality` é contrato com a proteção de branch.** Renomear não gera erro: o GitHub
-  fica esperando um check que nunca chega.
-- **Rodar o portão e falhar não impede merge** enquanto o job não for _required status check_ nas
-  três branches (seção 9.6).
+  simplesmente fica esperando um check que nunca chega, e o merge trava.
+- **O `CODEOWNERS` pede revisão, mas não obriga.** Falta `require_code_owner_reviews` na proteção — e
+  ele não pode ser ligado enquanto houver um único dono, porque travaria o responsável técnico nos
+  próprios PRs. Adicionar os handles dos outros integrantes é o que destrava isso e transforma o
+  RNF06 em barreira técnica em vez de acordo.
+- **`db.ts`, `redis.ts` e o caminho de falha do `env.ts` seguem sem cobertura.** São instanciação de
+  cliente de terceiro e um `process.exit` em carga de módulo, que não é coberto em processo. Não
+  foram excluídos da medição: se algum PR futuro mexer neles, a cobertura do diff vai cobrar.
+- **O repositório foi aberto para habilitar a proteção de branch** ([ADR 0017](./docs/adr/0017-repositorios-publicos.md)).
+  Se o GitHub Education ativar o plano Pro, o fundamento daquele ADR deixa de valer e ele precisa ser
+  reavaliado — o argumento de portfólio sustenta a escolha sozinho, mas é outro argumento e precisa
+  ser dito.
 - `SESSION_SECRET` exige 32 caracteres (`src/infra/env.ts`) — limite escolhido na configuração, não
   especificado no documento.
 - Prettier não consta na tabela 6.3, que lista a ferramenta apenas para o front-end.
@@ -83,14 +99,19 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 
 **Modelagem de dados:** models do `prisma/schema.prisma`, primeira migration e `docs/modelagem.md`.
 
-Antes ou em paralelo, três coisas da seção 11 que são de primeira semana e não dependem de código:
+Os três pontos bloqueantes de [`docs/modelagem.md`](./docs/modelagem.md) precisam de decisão do grupo
+**antes** da primeira migration, porque são lista fechada e não escolha de quem implementa:
 
-1. Rebuild do devcontainer e `docker compose up` funcionando.
-2. Validar o fluxo de cookie entre domínios (seção 8.1) — é o que se disfarça de bug de
-   autenticação se for descoberto na integração final.
-3. Tornar os três repositórios públicos e configurar a proteção de `main`, `release` e `dev`, com o
-   job `quality` como _required status check_.
+1. Os valores do enum `Segmento`.
+2. O formato das faixas de capital buscado e de ticket — enum de intervalos nomeados ou par de
+   valores numéricos. A escolha muda o cálculo do score.
+3. Se as áreas de expertise do mentor são lista fechada.
 
-Registrar como ADR as decisões já tomadas que ainda não têm arquivo: sessão opaca em vez de JWT,
-score determinístico, cota com devolução, anonimização, Express em vez de Nest, outbox no pagamento,
-casos de uso restritos a domínios pesados.
+Em paralelo, duas coisas de primeira semana que não dependem de código:
+
+- Rebuild do devcontainer e `docker compose up` funcionando.
+- Validar o fluxo de cookie entre domínios ([ADR 0015](./docs/adr/0015-cookie-entre-dominios-distintos.md)) —
+  é o que se disfarça de bug de autenticação se for descoberto só na integração final.
+
+E, quando os outros integrantes tiverem acesso: adicionar os handles ao `CODEOWNERS` e ligar
+`require_code_owner_reviews`.
