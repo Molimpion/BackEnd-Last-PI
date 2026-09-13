@@ -1,0 +1,15 @@
+* @Molimpion
+
+/quality-baseline.json @Molimpion
+/scripts/quality-gate.ts @Molimpion
+/.github/workflows/ @Molimpion
+/.github/CODEOWNERS @Molimpion
+
+/CHANGELOG.md @Molimpion
+/CONTEXT.md @Molimpion
+/CLAUDE.md @Molimpion
+/CONTRIBUTING.md @Molimpion
+/docs/adr/ @Molimpion
+
+/prisma/ @Molimpion
+/docs/modelagem.md @Molimpion
