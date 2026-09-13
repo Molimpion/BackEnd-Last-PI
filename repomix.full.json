@@ -1,0 +1,36 @@
+{
+  "output": {
+    "filePath": "repomix-output-completo.xml",
+    "style": "xml",
+    "removeEmptyLines": true,
+    "showLineNumbers": true,
+    "instructionFilePath": "CONTEXT.md"
+  },
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "repomix-output*",
+      "*.lock",
+      "package-lock.json",
+      "*.log",
+      "dist/",
+      "build/",
+      ".next/",
+      "coverage/",
+      "src/generated/",
+      "LICENSE",
+      ".husky/",
+      "Dockerfile",
+      ".dockerignore",
+      "commitlint.config.js",
+      "cliff.toml",
+      "repomix*.json",
+      ".prettierrc.json",
+      ".prettierignore"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
