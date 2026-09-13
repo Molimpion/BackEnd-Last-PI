@@ -146,6 +146,25 @@ Daí as duas regras:
 
 Na prática, seu PR do backend tem três coisas juntas: a rota, o DTO Zod e a anotação OpenAPI.
 
+## O CodeRabbit revisou meu PR. Isso conta como revisão?
+
+Não. O RNF06 exige revisão por outro **membro** do grupo, e bot não é membro. O CodeRabbit é
+complemento: ele pega o que passa despercebido, mas não aprova nada em nome de ninguém.
+
+Ele é configurado em `.coderabbit.yaml` e revisa automaticamente PRs direcionados a `dev` e
+`release`. Isso precisou ser configurado: por padrão ele só revisa PRs para a branch padrão (`main`),
+e como todo PR de feature vai para `dev`, ele nunca revisaria nada sozinho.
+
+O arquivo também ensina ao bot as regras deste repositório, por diretório — a fronteira de camadas
+em `src/features/`, a proibição de `any`, a exigência de teste de integração nos cinco fluxos
+críticos, e a instrução para sinalizar quando alguém escreve um número de negócio que ainda não foi
+decidido.
+
+Para pedir uma revisão manual, comente `@coderabbitai review` no PR.
+
+Discordar de uma sugestão dele é legítimo. Discorde com argumento, no próprio PR — é o que fica
+registrado para quem ler depois.
+
 ## Por que `CONTRIBUTING.md` e não um `GITFLOW.md`?
 
 O fluxo de branches já está na seção 9.1 do documento de projeto. Um arquivo repetindo aquilo cria

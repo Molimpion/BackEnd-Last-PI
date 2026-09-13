@@ -57,6 +57,7 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 | Vulnerabilidade no baseline por **ID de advisory**, não contagem | Contagem deixa passar advisory novo quando outro sai no mesmo PR                                                                       |
 | Portão roda os testes ele mesmo                                  | Se o workflow rodasse a suíte antes, uma falha impediria as outras seis verificações — o curto-circuito voltaria pela porta dos fundos |
 | Changelog escrito à mão, rascunho gerado                         | Commit descreve o que o dev fez; changelog descreve o que mudou para quem usa                                                          |
+| CodeRabbit revisando PRs para `dev` e `release`                  | Por padrão ele só revisa PRs para a branch padrão; como toda feature vai para `dev`, nunca revisaria nada. Não substitui o RNF06       |
 
 ## Dívidas e riscos conhecidos
 

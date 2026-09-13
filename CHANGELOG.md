@@ -38,6 +38,8 @@ Seções usadas: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`
 - ADRs 0002 a 0022, cobrindo todas as decisões com alternativa recusada identificadas no documento
   de projeto, agrupadas por tema em `docs/adr/README.md`.
 - Template de pull request.
+- Revisão automática por CodeRabbit nos PRs para `dev` e `release`, com as regras do projeto por
+  diretório. Complementa a revisão humana exigida pelo RNF06, não substitui.
 
 ### Segurança
 

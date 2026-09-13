@@ -81,10 +81,28 @@ O hook de `pre-commit` roda formatação e tipos, mas hooks podem ser ignorados 
 - [ ] Teste cobrindo o comportamento novo. Nos cinco fluxos críticos do RNF07, teste de
       **integração**, não unitário com dependência mockada.
 
+## Quem revisa o seu PR
+
+Duas coisas acontecem quando você abre um PR, e elas não se substituem.
+
+**O CodeRabbit revisa automaticamente.** É um bot, configurado em
+[`.coderabbit.yaml`](./.coderabbit.yaml), que conhece as regras deste repositório — fronteira de
+camadas, proibição de `any`, exigência de teste de integração nos cinco fluxos críticos — e sinaliza
+quando alguém escreve um número de negócio que ainda não foi decidido (peso de score, valor de cota,
+preço de plano, prazo de tolerância).
+
+Ele comenta em PRs direcionados a `dev` e `release`. Para pedir uma revisão manual, comente
+`@coderabbitai review` no PR.
+
+**O CodeRabbit não conta como a revisão que o RNF06 exige.** O requisito pede revisão por outro
+**membro** do grupo. O bot é complemento: ele pega o que passa despercebido, mas não aprova nada em
+nome de ninguém. Sugestão dele que você discordar, você discorda — com argumento, no próprio PR.
+
 ## O que o CI barra
 
 O job `quality` roda em PR para `dev`, `release` e `main`, e é _required status check_ nas três
-branches. PR com o job vermelho não é mesclado.
+branches. PR com o job vermelho não é mesclado — **nem pelo responsável técnico**, porque a proteção
+está com `enforce_admins` ligado.
 
 Ele roda formatação, build e o **portão de qualidade** (`npm run quality`), que verifica sete coisas
 de uma vez: testes, lint, vulnerabilidades de produção, tipos, ocorrências de `any`, de `as any`, de

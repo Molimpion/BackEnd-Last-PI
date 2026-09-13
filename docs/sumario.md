@@ -71,14 +71,15 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 
 ## Infraestrutura e CI
 
-| Arquivo                            | O que faz                                                                        |
-| ---------------------------------- | -------------------------------------------------------------------------------- |
-| `docker-compose.yml`               | PostgreSQL e Redis por padrão; os três processos da aplicação sob o perfil `app` |
-| `Dockerfile`                       | Imagem de produção, em múltiplos estágios                                        |
-| `.dockerignore`                    | O que não entra na imagem                                                        |
-| `.github/workflows/ci.yml`         | Job `quality`. Roda em PR e push para `dev`, `release` e `main`                  |
-| `.github/pull_request_template.md` | Checklist que aparece na descrição de todo PR                                    |
-| `.gitignore`                       | O que não é versionado                                                           |
+| Arquivo                            | O que faz                                                                                              |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `docker-compose.yml`               | PostgreSQL e Redis por padrão; os três processos da aplicação sob o perfil `app`                       |
+| `Dockerfile`                       | Imagem de produção, em múltiplos estágios                                                              |
+| `.dockerignore`                    | O que não entra na imagem                                                                              |
+| `.github/workflows/ci.yml`         | Job `quality`. Roda em PR e push para `dev`, `release` e `main`                                        |
+| `.github/pull_request_template.md` | Checklist que aparece na descrição de todo PR                                                          |
+| `.coderabbit.yaml`                 | Revisão automática por bot nos PRs para `dev` e `release`. Complementa a revisão humana, não substitui |
+| `.gitignore`                       | O que não é versionado                                                                                 |
 
 ## Empacotar o repositório para uma IA
 
