@@ -217,6 +217,9 @@ Definidos pelo documento:
 Não escreva a primeira migration sem resolver estes pontos. Todos são lista fechada ou valor de
 negócio que o documento exige mas não define.
 
+> Os três primeiros — os que **bloqueiam** a migration — têm valores propostos em
+> [`proposta-listas-fechadas.md`](./proposta-listas-fechadas.md), para o grupo aceitar ou ajustar.
+
 | #   | O que falta                                         | Por que trava                                                                                                                                                                     |
 | --- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | **Os valores do enum `Segmento`**                   | O RF01 exige lista fechada e cita exemplos (Fintech, Healthtech, Agrotech, Edtech, Retailtech), mas não fecha a lista. Texto livre inviabiliza o cruzamento do motor de afinidade |
