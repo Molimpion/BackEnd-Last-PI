@@ -42,6 +42,38 @@ Seções usadas: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`
   diretório. Complementa a revisão humana exigida pelo RNF06, não substitui.
 - `CODEOWNERS` pedindo revisão automaticamente, com dono explícito nos caminhos sensíveis: baseline
   do portão, workflows, ADRs, schema e os arquivos mantidos pelo responsável técnico.
+- Modelo de dados completo no `prisma/schema.prisma`: 25 entidades e 21 enums, cobrindo identidade,
+  perfis, vitrine, conexão, matchmaking, assinatura, pagamento e governança.
+- Primeira migration (`modelagem_inicial`), com índices únicos parciais que impedem solicitação
+  pendente duplicada, pedido de acesso pendente duplicado e duas reuniões ativas na mesma
+  solicitação.
+- Teste de integração contra o PostgreSQL real cobrindo esses três índices.
+- ADRs 0028 a 0035: planos por público em três níveis, destaque pago do mentor na busca,
+  solicitação a investidor e mentor com cota mensal, acesso do mentor ao perfil completo, estados da
+  reunião, escala e critérios do feedback, notificações de segurança e reconciliação periódica com o
+  gateway de pagamento.
+- Perguntas frequentes sobre a pasta `src/generated/` e sobre a relação entre migration e geração do
+  cliente.
+
+### Alterado
+
+- `docs/modelagem.md` deixa de ser proposta e passa a descrever o modelo decidido, com o ADR de cada
+  decisão e os valores de negócio ainda em aberto.
+- `Projeto_Matchmaking.md` reflete as decisões dos ADRs 0028 a 0035 nos RF05, RF10, RF13, RF15 e
+  RF17.
+- A liberação de plano passa a ocorrer por confirmação do gateway — webhook validado ou consulta do
+  servidor —, e não mais exclusivamente por webhook.
+- `npm run db:migrate` passa a regerar o cliente Prisma depois de aplicar a migration.
+
+### Corrigido
+
+- A fronteira de camadas no ESLint não barrava o acesso ao banco fora do repository: a regra só
+  recusava `@prisma/client`, que ninguém importa no Prisma 7. Passa a recusar também `infra/db.js`
+  e `generated/prisma` em controller, service e use case.
+
+### Removido
+
+- `docs/proposta-listas-fechadas.md`, substituído pelos enums no schema.
 
 ### Segurança
 
