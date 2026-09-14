@@ -44,8 +44,8 @@ próprio PR e hoje há um único revisor.
 **Não existe ainda:** model no `prisma/schema.prisma`, migration, `src/features/`, sessão,
 autenticação, especificação OpenAPI.
 
-`docs/modelagem.md` existe como **proposta** — nenhum model foi escrito no schema, e três listas
-fechadas que ela depende continuam indefinidas.
+`docs/modelagem.md` existe como **proposta** — nenhum model foi escrito no schema. As três listas
+fechadas de que ela dependia já foram decididas (ver "Próximo passo").
 
 O que existe de código é `src/app.ts` (helmet, CORS com credenciais, pino-http, JSON, `/health`,
 tratador de erros), os três entrypoints e `src/infra/` com env validado por Zod, Prisma com adapter
@@ -56,19 +56,21 @@ bootstrap e encerramento gracioso — sem fila e sem rotina.
 
 As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, tomadas nesta fase:
 
-| Decisão                                                          | Razão                                                                                                                                  |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| ESM, Node 22                                                     | Padrão da linguagem, suporte nativo                                                                                                    |
-| `app.ts` separado de `api.ts`                                    | `app.ts` não abre porta, o que permite testar com supertest sem servidor pendurado                                                     |
-| TypeScript fixado em 5.x                                         | `typescript-eslint` declara peer `typescript <6.1.0`; TS 7 deixaria o lint sem suporte                                                 |
-| Prisma CLI fixado em 7.x                                         | O `latest` do npm aponta para `8.0.0-rc`                                                                                               |
-| URL do banco via `process.env` direto em `prisma.config.ts`      | O helper `env()` resolve ao carregar o config e quebraria `npm ci` sem `.env`                                                          |
-| `multer-storage-cloudinary` removido                             | Prendia o `cloudinary` na 1.x (GHSA-g4mf-96x5-5m2c). Upload será `multer` memoryStorage + `upload_stream`                              |
-| Fronteira de camadas aplicada por ESLint                         | `no-restricted-imports` recusa `express` em service/usecase e `@prisma/client` fora do repository                                      |
-| Vulnerabilidade no baseline por **ID de advisory**, não contagem | Contagem deixa passar advisory novo quando outro sai no mesmo PR                                                                       |
-| Portão roda os testes ele mesmo                                  | Se o workflow rodasse a suíte antes, uma falha impediria as outras seis verificações — o curto-circuito voltaria pela porta dos fundos |
-| Changelog escrito à mão, rascunho gerado                         | Commit descreve o que o dev fez; changelog descreve o que mudou para quem usa                                                          |
-| CodeRabbit revisando PRs para `dev` e `release`                  | Por padrão ele só revisa PRs para a branch padrão; como toda feature vai para `dev`, nunca revisaria nada. Não substitui o RNF06       |
+| Decisão                                                          | Razão                                                                                                                                     |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| ESM, Node 22                                                     | Padrão da linguagem, suporte nativo                                                                                                       |
+| `app.ts` separado de `api.ts`                                    | `app.ts` não abre porta, o que permite testar com supertest sem servidor pendurado                                                        |
+| TypeScript fixado em 5.x                                         | `typescript-eslint` declara peer `typescript <6.1.0`; TS 7 deixaria o lint sem suporte                                                    |
+| Prisma CLI fixado em 7.x                                         | O `latest` do npm aponta para `8.0.0-rc`                                                                                                  |
+| URL do banco via `process.env` direto em `prisma.config.ts`      | O helper `env()` resolve ao carregar o config e quebraria `npm ci` sem `.env`                                                             |
+| `multer-storage-cloudinary` removido                             | Prendia o `cloudinary` na 1.x (GHSA-g4mf-96x5-5m2c). Upload será `multer` memoryStorage + `upload_stream`                                 |
+| Fronteira de camadas aplicada por ESLint                         | `no-restricted-imports` recusa `express` em service/usecase e `@prisma/client` fora do repository                                         |
+| Vulnerabilidade no baseline por **ID de advisory**, não contagem | Contagem deixa passar advisory novo quando outro sai no mesmo PR                                                                          |
+| Portão roda os testes ele mesmo                                  | Se o workflow rodasse a suíte antes, uma falha impediria as outras seis verificações — o curto-circuito voltaria pela porta dos fundos    |
+| Changelog escrito à mão, rascunho gerado                         | Commit descreve o que o dev fez; changelog descreve o que mudou para quem usa                                                             |
+| CodeRabbit revisando PRs para `dev` e `release`                  | Por padrão ele só revisa PRs para a branch padrão; como toda feature vai para `dev`, nunca revisaria nada. Não substitui o RNF06          |
+| Perfil do investidor visível às startups                         | O RF04 define o perfil público só da startup; sem o outro lado, a descoberta funcionaria em um sentido só e o RF15 não teria o que buscar |
+| Moderação com critérios próprios por tipo de conta               | Os três critérios do RF08 são sobre startup. Sem critério escrito para `PESSOA`, o selo do RF16 não teria contra o quê ser conferido      |
 
 ## Dívidas e riscos conhecidos
 
@@ -97,15 +99,27 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 
 ## Próximo passo
 
-**Modelagem de dados:** models do `prisma/schema.prisma`, primeira migration e `docs/modelagem.md`.
+**Modelagem de dados:** escrever os models do `prisma/schema.prisma` e gerar a primeira migration.
+A proposta de modelo já está em [`docs/modelagem.md`](./docs/modelagem.md).
 
-Os três pontos bloqueantes de [`docs/modelagem.md`](./docs/modelagem.md) precisam de decisão do grupo
-**antes** da primeira migration, porque são lista fechada e não escolha de quem implementa:
+**Os três pontos que bloqueavam a migration foram decididos.** Valores em
+[`docs/proposta-listas-fechadas.md`](./docs/proposta-listas-fechadas.md), racional nos ADRs 0024 a
+0027:
 
-1. Os valores do enum `Segmento`.
-2. O formato das faixas de capital buscado e de ticket — enum de intervalos nomeados ou par de
-   valores numéricos. A escolha muda o cálculo do score.
-3. Se as áreas de expertise do mentor são lista fechada.
+- `Segmento` com 12 valores, sem `OUTRO`. A startup marca **no máximo 2**, o investidor marca quantos
+  quiser, e **um segmento em comum já vale a pontuação cheia** no score.
+- Faixas de capital e ticket como **par de números em centavos**, teto obrigatório, mínimo R$ 1.000.
+  O front exibe agrupado; a API devolve o inteiro.
+- **9 áreas** de expertise do mentor, cada uma com **anos de experiência**. Como é autodeclaração, a
+  moderação confere contra o LinkedIn até a terceira avaliação; a partir dela, a nota das startups
+  substitui o declarado.
+
+Duas decisões que vieram junto e mudam o que já estava escrito: **o perfil do investidor é visível às
+startups** (a nota dele continua só para o administrador), e **a moderação passa a ter critérios
+próprios por tipo de conta**, incluindo `PESSOA`.
+
+Com isso, o schema está destravado: escrever os models do `prisma/schema.prisma` e gerar a primeira
+migration.
 
 Em paralelo, duas coisas de primeira semana que não dependem de código:
 
