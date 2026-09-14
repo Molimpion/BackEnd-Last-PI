@@ -8,3 +8,611 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum TipoDeConta {
+  STARTUP
+  PESSOA
+  ADMINISTRADOR
+}
+
+enum StatusDaConta {
+  ATIVA
+  INATIVA
+  SUSPENSA
+}
+
+enum Papel {
+  INVESTIDOR
+  MENTOR
+}
+
+enum Segmento {
+  FINTECH
+  HEALTHTECH
+  EDTECH
+  AGROTECH
+  HRTECH
+  LEGALTECH
+  MARTECH
+  LOGTECH
+  GOVTECH
+  CONSTRUTECH
+  ECONOMIA_CRIATIVA
+  RETAILTECH
+}
+
+enum AreaDeExpertise {
+  PRODUTO
+  TECNOLOGIA
+  DESIGN_E_UX
+  MARKETING
+  FINANCAS
+  VENDAS_E_GO_TO_MARKET
+  PESSOAS_E_CULTURA
+  JURIDICO_E_SOCIETARIO
+  CAPTACAO_E_INVESTIMENTO
+}
+
+enum EstagioDaStartup {
+  IDEACAO
+  VALIDACAO
+  TRACAO
+  ESCALA
+}
+
+enum NaturezaDaBusca {
+  CAPITAL
+  MENTORIA
+  AMBOS
+}
+
+enum ModeloDeNegocio {
+  B2B
+  B2C
+  AMBOS
+}
+
+enum StatusDeModeracao {
+  PENDENTE
+  APROVADO
+  REPROVADO
+}
+
+enum StatusDaSolicitacao {
+  PENDENTE
+  ACEITA
+  RECUSADA
+  EXPIRADA
+}
+
+enum StatusDaReuniao {
+  PROPOSTA
+  CONFIRMADA
+  RECUSADA
+  REALIZADA
+  NAO_REALIZADA
+}
+
+enum VisibilidadeDoFeedback {
+  PUBLICA
+  STARTUP_APOS_TERCEIRA
+  SOMENTE_ADMINISTRADOR
+}
+
+enum StatusDaAutorizacao {
+  PENDENTE
+  APROVADA
+  NEGADA
+}
+
+enum PublicoDoPlano {
+  STARTUP
+  INVESTIDOR
+  MENTOR
+}
+
+enum NivelDoPlano {
+  GRATUITO
+  PRO
+  PREMIUM
+}
+
+enum StatusDaAssinatura {
+  SEM_PLANO
+  ATIVA
+  CANCELADA_VIGENTE
+  INADIMPLENTE_EM_TOLERANCIA
+  ENCERRADA
+}
+
+enum StatusDaCobranca {
+  PENDENTE
+  PAGA
+  FALHOU
+  ESTORNADA
+}
+
+enum OrigemDoEvento {
+  WEBHOOK
+  RECONCILIACAO
+}
+
+enum AcaoDeAuditoria {
+  MODERACAO_APROVADA
+  MODERACAO_REPROVADA
+  ACESSO_CONCEDIDO
+  ACESSO_NEGADO
+  ACESSO_REVOGADO
+  DADO_PROTEGIDO_ACESSADO
+  ASSINATURA_ALTERADA
+  PAGAMENTO_REGISTRADO
+  PAPEL_ADICIONADO
+  PAPEL_REMOVIDO
+  LOGIN_FALHOU
+  AUDITORIA_CONSULTADA
+  CONTA_EXCLUIDA
+  ADMINISTRADOR_CRIADO
+  CONTA_SUSPENSA
+  CONTA_REATIVADA
+  SENHA_ALTERADA
+}
+
+enum TipoDeConsentimento {
+  TERMOS_DE_USO
+  TRATAMENTO_DE_DADOS
+  COMUNICACOES_DE_MARKETING
+}
+
+enum TipoDeNotificacao {
+  SOLICITACAO_RECEBIDA
+  SOLICITACAO_ACEITA
+  SOLICITACAO_RECUSADA
+  SOLICITACAO_PRESTES_A_EXPIRAR
+  MENSAGEM_RECEBIDA
+  REUNIAO_PROPOSTA
+  REUNIAO_CONFIRMADA
+  REUNIAO_RECUSADA
+  CADASTRO_APROVADO
+  CADASTRO_REPROVADO
+  COBRANCA_APROVADA
+  COBRANCA_FALHOU
+  ASSINATURA_PRESTES_A_VENCER
+  ASSINATURA_REBAIXADA
+  LOGIN_NOVO
+  SENHA_ALTERADA
+  MFA_ALTERADO
+}
+
+model Conta {
+  id                String        @id @default(uuid(7))
+  email             String        @unique
+  senhaHash         String
+  tipo              TipoDeConta
+  status            StatusDaConta @default(ATIVA)
+  emailVerificadoEm DateTime?
+  mfaSegredo        String?
+  mfaAtivadoEm      DateTime?
+  anonimizadaEm     DateTime?
+  criadoEm          DateTime      @default(now())
+  atualizadoEm      DateTime      @updatedAt
+
+  startup                   Startup?
+  pessoa                    Pessoa?
+  codigosDeRecuperacaoMfa   CodigoDeRecuperacaoMfa[]
+  mensagens                 Mensagem[]
+  propostasDeHorario        PropostaDeHorario[]
+  feedbacksDados            Feedback[]                 @relation("FeedbackAvaliador")
+  feedbacksRecebidos        Feedback[]                 @relation("FeedbackAvaliado")
+  assinaturas               Assinatura[]
+  consentimentos            Consentimento[]
+  notificacoes              Notificacao[]
+  preferenciasDeNotificacao PreferenciaDeNotificacao[]
+  registrosDeAuditoria      RegistroDeAuditoria[]
+}
+
+model CodigoDeRecuperacaoMfa {
+  id           String    @id @default(uuid(7))
+  contaId      String
+  codigoHash   String
+  usadoEm      DateTime?
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+
+  conta Conta @relation(fields: [contaId], references: [id])
+
+  @@index([contaId])
+}
+
+model Pessoa {
+  id                String            @id @default(uuid(7))
+  contaId           String            @unique
+  nome              String
+  cidade            String
+  linkedin          String
+  empresaOuAtuacao  String
+  statusDeModeracao StatusDeModeracao @default(PENDENTE)
+  motivoDaModeracao String?
+  moderadaEm        DateTime?
+  verificadaEm      DateTime?
+  criadoEm          DateTime          @default(now())
+  atualizadoEm      DateTime          @updatedAt
+
+  conta                 Conta                  @relation(fields: [contaId], references: [id])
+  perfilInvestidor      PerfilInvestidor?
+  perfilMentor          PerfilMentor?
+  solicitacoesRecebidas Solicitacao[]
+  autorizacoesDeAcesso  AutorizacaoDeAcesso[]
+  visualizacoesDePerfil VisualizacaoDePerfil[]
+
+  @@index([statusDeModeracao])
+}
+
+model PerfilInvestidor {
+  id                   String             @id @default(uuid(7))
+  pessoaId             String             @unique
+  tese                 String?
+  segmentosDeInteresse Segmento[]
+  estagiosDeInteresse  EstagioDaStartup[]
+  ticketMinimo         Int
+  ticketMaximo         Int
+  modeloDeNegocio      ModeloDeNegocio
+  criadoEm             DateTime           @default(now())
+  atualizadoEm         DateTime           @updatedAt
+
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id])
+
+  @@index([segmentosDeInteresse], type: Gin)
+  @@index([estagiosDeInteresse], type: Gin)
+}
+
+model PerfilMentor {
+  id                  String   @id @default(uuid(7))
+  pessoaId            String   @unique
+  horasPorMes         Int
+  avaliacoesRecebidas Int      @default(0)
+  criadoEm            DateTime @default(now())
+  atualizadoEm        DateTime @updatedAt
+
+  pessoa Pessoa           @relation(fields: [pessoaId], references: [id])
+  areas  AreaDeMentoria[]
+}
+
+model AreaDeMentoria {
+  id                String          @id @default(uuid(7))
+  perfilMentorId    String
+  area              AreaDeExpertise
+  anosDeExperiencia Int
+  criadoEm          DateTime        @default(now())
+  atualizadoEm      DateTime        @updatedAt
+
+  perfilMentor PerfilMentor @relation(fields: [perfilMentorId], references: [id])
+
+  @@unique([perfilMentorId, area])
+  @@index([area])
+}
+
+model Startup {
+  id                  String            @id @default(uuid(7))
+  contaId             String            @unique
+  nome                String
+  segmentos           Segmento[]
+  estagio             EstagioDaStartup
+  cidade              String
+  descricaoCurta      String
+  capitalMinimo       Int
+  capitalMaximo       Int
+  naturezaDaBusca     NaturezaDaBusca
+  cnpj                String?
+  site                String?
+  logotipoUrl         String?
+  vinculoPortoDigital String?
+  statusDeModeracao   StatusDeModeracao @default(PENDENTE)
+  motivoDaModeracao   String?
+  moderadaEm          DateTime?
+  verificadaEm        DateTime?
+  criadoEm            DateTime          @default(now())
+  atualizadoEm        DateTime          @updatedAt
+
+  conta                 Conta                  @relation(fields: [contaId], references: [id])
+  canvas                Canvas?
+  solicitacoes          Solicitacao[]
+  autorizacoesDeAcesso  AutorizacaoDeAcesso[]
+  visualizacoesDePerfil VisualizacaoDePerfil[]
+
+  @@index([statusDeModeracao, estagio])
+  @@index([segmentos], type: Gin)
+  @@index([criadoEm])
+  @@index([cnpj])
+}
+
+model Canvas {
+  id               String   @id @default(uuid(7))
+  startupId        String   @unique
+  problema         String
+  solucao          String
+  propostaDeValor  String
+  tamanhoDeMercado String
+  tracao           String
+  modeloDeReceita  String
+  criadoEm         DateTime @default(now())
+  atualizadoEm     DateTime @updatedAt
+
+  startup Startup @relation(fields: [startupId], references: [id])
+}
+
+model Solicitacao {
+  id                  String              @id @default(uuid(7))
+  startupId           String
+  pessoaId            String
+  papelDoDestinatario Papel
+  pauta               String
+  status              StatusDaSolicitacao @default(PENDENTE)
+  enviadaEm           DateTime            @default(now())
+  expiraEm            DateTime
+  respondidaEm        DateTime?
+  criadoEm            DateTime            @default(now())
+  atualizadoEm        DateTime            @updatedAt
+
+  startup  Startup   @relation(fields: [startupId], references: [id])
+  pessoa   Pessoa    @relation(fields: [pessoaId], references: [id])
+  conversa Conversa?
+  reunioes Reuniao[]
+
+  @@index([status, expiraEm])
+  @@index([startupId, enviadaEm])
+  @@index([pessoaId, status])
+}
+
+model Conversa {
+  id            String   @id @default(uuid(7))
+  solicitacaoId String   @unique
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  solicitacao Solicitacao @relation(fields: [solicitacaoId], references: [id])
+  mensagens   Mensagem[]
+}
+
+model Mensagem {
+  id           String   @id @default(uuid(7))
+  conversaId   String
+  autorContaId String
+  conteudo     String
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  conversa Conversa @relation(fields: [conversaId], references: [id])
+  autor    Conta    @relation(fields: [autorContaId], references: [id])
+
+  @@index([conversaId, criadoEm])
+}
+
+model Reuniao {
+  id            String          @id @default(uuid(7))
+  solicitacaoId String
+  pauta         String
+  status        StatusDaReuniao @default(PROPOSTA)
+  criadoEm      DateTime        @default(now())
+  atualizadoEm  DateTime        @updatedAt
+
+  solicitacao Solicitacao         @relation(fields: [solicitacaoId], references: [id])
+  propostas   PropostaDeHorario[]
+  feedbacks   Feedback[]
+
+  @@index([solicitacaoId])
+  @@index([status])
+}
+
+model PropostaDeHorario {
+  id           String   @id @default(uuid(7))
+  reuniaoId    String
+  autorContaId String
+  inicioEm     DateTime
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  reuniao Reuniao @relation(fields: [reuniaoId], references: [id])
+  autor   Conta   @relation(fields: [autorContaId], references: [id])
+
+  @@index([reuniaoId, criadoEm])
+}
+
+model Feedback {
+  id                    String                 @id @default(uuid(7))
+  reuniaoId             String
+  avaliadorContaId      String
+  avaliadoContaId       String
+  qualidadeDaConversa   Int?
+  utilidadeDaOrientacao Int?
+  preparacaoDaStartup   Int?
+  aderenciaATese        Int?
+  aberturaAOrientacao   Int?
+  comentario            String?
+  visibilidade          VisibilidadeDoFeedback
+  criadoEm              DateTime               @default(now())
+  atualizadoEm          DateTime               @updatedAt
+
+  reuniao   Reuniao @relation(fields: [reuniaoId], references: [id])
+  avaliador Conta   @relation("FeedbackAvaliador", fields: [avaliadorContaId], references: [id])
+  avaliado  Conta   @relation("FeedbackAvaliado", fields: [avaliadoContaId], references: [id])
+
+  @@unique([reuniaoId, avaliadorContaId])
+  @@index([avaliadoContaId, visibilidade])
+}
+
+model VisualizacaoDePerfil {
+  id            String   @id @default(uuid(7))
+  startupId     String
+  pessoaId      String
+  papel         Papel
+  visualizadaEm DateTime @default(now())
+
+  startup Startup @relation(fields: [startupId], references: [id])
+  pessoa  Pessoa  @relation(fields: [pessoaId], references: [id])
+
+  @@index([startupId, visualizadaEm])
+}
+
+model AutorizacaoDeAcesso {
+  id                 String              @id @default(uuid(7))
+  startupId          String
+  pessoaId           String
+  papelDoSolicitante Papel
+  status             StatusDaAutorizacao @default(PENDENTE)
+  solicitadaEm       DateTime            @default(now())
+  respondidaEm       DateTime?
+  revogadaEm         DateTime?
+  criadoEm           DateTime            @default(now())
+  atualizadoEm       DateTime            @updatedAt
+
+  startup Startup @relation(fields: [startupId], references: [id])
+  pessoa  Pessoa  @relation(fields: [pessoaId], references: [id])
+
+  @@index([startupId, status])
+  @@index([pessoaId, startupId])
+}
+
+model Plano {
+  id                       String         @id @default(uuid(7))
+  publico                  PublicoDoPlano
+  nivel                    NivelDoPlano
+  precoEmCentavos          Int
+  cotaMensalDeSolicitacoes Int?
+  limiteDeMatchesVisiveis  Int?
+  limiteMensalDeAceites    Int?
+  feedbackDetalhado        Boolean
+  destaqueNaBusca          Boolean
+  buscaAvancada            Boolean
+  metricasDeVisualizacao   Boolean
+  exportacaoDeRelatorios   Boolean
+  criadoEm                 DateTime       @default(now())
+  atualizadoEm             DateTime       @updatedAt
+
+  assinaturas Assinatura[]
+
+  @@unique([publico, nivel])
+}
+
+model Assinatura {
+  id                 String             @id @default(uuid(7))
+  contaId            String
+  publico            PublicoDoPlano
+  planoId            String
+  status             StatusDaAssinatura @default(SEM_PLANO)
+  idNoGateway        String?            @unique
+  periodoAtualInicio DateTime?
+  periodoAtualFim    DateTime?
+  canceladaEm        DateTime?
+  toleranciaAte      DateTime?
+  encerradaEm        DateTime?
+  criadoEm           DateTime           @default(now())
+  atualizadoEm       DateTime           @updatedAt
+
+  conta     Conta      @relation(fields: [contaId], references: [id])
+  plano     Plano      @relation(fields: [planoId], references: [id])
+  cobrancas Cobranca[]
+
+  @@unique([contaId, publico])
+  @@index([status, periodoAtualFim])
+  @@index([status, toleranciaAte])
+}
+
+model Cobranca {
+  id              String           @id @default(uuid(7))
+  assinaturaId    String
+  valorEmCentavos Int
+  status          StatusDaCobranca @default(PENDENTE)
+  idNoGateway     String           @unique
+  vencimentoEm    DateTime?
+  pagaEm          DateTime?
+  criadoEm        DateTime         @default(now())
+  atualizadoEm    DateTime         @updatedAt
+
+  assinatura Assinatura @relation(fields: [assinaturaId], references: [id])
+
+  @@index([assinaturaId, criadoEm])
+}
+
+model EventoDoGateway {
+  id                    String         @id @default(uuid(7))
+  origem                OrigemDoEvento
+  idDoEventoNoGateway   String?        @unique
+  idDaCobrancaNoGateway String?
+  tipo                  String
+  payload               Json
+  processadoEm          DateTime?
+  erro                  String?
+  recebidoEm            DateTime       @default(now())
+
+  @@index([processadoEm, recebidoEm])
+  @@index([idDaCobrancaNoGateway])
+}
+
+model TrabalhoPendente {
+  id            String    @id @default(uuid(7))
+  tipo          String
+  payload       Json
+  enfileiradoEm DateTime?
+  criadoEm      DateTime  @default(now())
+  atualizadoEm  DateTime  @updatedAt
+
+  @@index([enfileiradoEm])
+}
+
+model Consentimento {
+  id                String              @id @default(uuid(7))
+  contaId           String
+  tipo              TipoDeConsentimento
+  versaoDoDocumento String
+  ip                String
+  aceitoEm          DateTime            @default(now())
+  revogadoEm        DateTime?
+  atualizadoEm      DateTime            @updatedAt
+
+  conta Conta @relation(fields: [contaId], references: [id])
+
+  @@index([contaId, tipo])
+}
+
+model RegistroDeAuditoria {
+  id          String          @id @default(uuid(7))
+  atorContaId String?
+  acao        AcaoDeAuditoria
+  alvoTipo    String?
+  alvoId      String?
+  ip          String?
+  metadados   Json?
+  criadoEm    DateTime        @default(now())
+
+  ator Conta? @relation(fields: [atorContaId], references: [id])
+
+  @@index([atorContaId, criadoEm])
+  @@index([criadoEm])
+}
+
+model Notificacao {
+  id           String            @id @default(uuid(7))
+  contaId      String
+  tipo         TipoDeNotificacao
+  mensagem     String
+  lidaEm       DateTime?
+  criadoEm     DateTime          @default(now())
+  atualizadoEm DateTime          @updatedAt
+
+  conta Conta @relation(fields: [contaId], references: [id])
+
+  @@index([contaId, criadoEm])
+}
+
+model PreferenciaDeNotificacao {
+  id              String            @id @default(uuid(7))
+  contaId         String
+  tipo            TipoDeNotificacao
+  receberPorEmail Boolean
+  criadoEm        DateTime          @default(now())
+  atualizadoEm    DateTime          @updatedAt
+
+  conta Conta @relation(fields: [contaId], references: [id])
+
+  @@unique([contaId, tipo])
+}

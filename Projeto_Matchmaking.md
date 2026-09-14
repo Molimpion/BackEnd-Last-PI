@@ -260,21 +260,27 @@ _Disciplina: Full Stack_
 O sistema deve permitir comunicação e agendamento de reuniões dentro da plataforma.
 
 **Chat interno:** troca de mensagens com histórico persistido. Substitui a conversa dispersa em WhatsApp, que hoje perde histórico e não gera dado para o ecossistema.
-**Agendamento interno:** a startup propõe data, hora e **pauta obrigatória**; o investidor aceita, recusa ou contrapropõe horário; o sistema registra a reunião e seu desfecho.
+**Agendamento interno:** a startup propõe data, hora e **pauta obrigatória**; o investidor ou mentor aceita, recusa ou contrapropõe horário; o sistema registra a reunião e seu desfecho.
+
+**Destinatário da solicitação:** a startup pode enviar solicitação a um **investidor ou a um mentor**. A solicitação registra por qual papel a pessoa foi abordada (ADR 0030).
+
+**Estados da reunião:** `PROPOSTA`, `CONFIRMADA`, `RECUSADA`, `REALIZADA`, `NAO_REALIZADA`. Contraproposta não é estado: cada proposta de horário fica registrada em histórico. Uma solicitação aceita pode originar várias reuniões, com **no máximo uma ativa** (`PROPOSTA` ou `CONFIRMADA`) por vez (ADR 0032).
 
 **Critérios de aceitação:**
 
 - O chat só é aberto após o aceite da solicitação — nunca antes.
 - Nenhuma solicitação de reunião é criada sem pauta preenchida.
+- Nenhuma solicitação aceita tem duas reuniões ativas ao mesmo tempo.
 - Integração com calendário externo (Google Calendar e similares) está **fora de escopo**, documentada como evolução futura.
 
 #### Regra de cota de solicitações
 
-A startup possui cota de solicitações por período, definida pelo plano contratado (RF17).
+A startup possui cota de solicitações **por mês calendário**, definida pelo plano contratado (RF17). A cota volta no dia 1.
 
-- A cota é **debitada no envio** da solicitação.
-- A cota é **devolvida** quando a solicitação é recusada pelo investidor ou quando expira.
+- A cota é **debitada no envio** da solicitação, seja a investidor ou a mentor.
+- A cota é **devolvida** quando a solicitação é recusada pelo destinatário ou quando expira.
 - A solicitação expira automaticamente em **15 dias** sem resposta.
+- A startup tem **no máximo uma solicitação pendente** para a mesma pessoa pelo mesmo papel. Depois de recusada ou expirada, pode enviar de novo.
 
 Estados da solicitação: `PENDENTE` → `ACEITA` | `RECUSADA` | `EXPIRADA`. A devolução ocorre nas transições para `RECUSADA` e `EXPIRADA`.
 
@@ -370,6 +376,9 @@ Após reunião marcada como realizada, ambas as partes avaliam a interação, co
 
 - A startup avalia a qualidade da conversa e a utilidade da orientação recebida.
 - O investidor avalia a preparação da startup e a aderência à sua tese.
+- O mentor avalia a preparação da startup e a abertura à orientação.
+
+**Escala:** nota de 1 a 5 por critério, com comentário livre opcional. A nota geral é a média dos critérios, não um valor informado à parte (ADR 0033).
 
 **Visibilidade assimétrica, por decisão de produto:**
 
@@ -416,13 +425,15 @@ _Disciplinas: Full Stack / Governança em TI — requisito acrescentado_
 
 Formaliza o fluxo que sustenta os níveis de visibilidade do RF04.
 
-**Fluxo:** o investidor solicita acesso ao perfil completo ➔ a startup é notificada e visualiza quem solicitou ➔ aprova ou nega ➔ o acesso concedido é registrado e pode ser **revogado a qualquer momento** pela startup.
+**Fluxo:** o investidor ou mentor solicita acesso ao perfil completo ➔ a startup é notificada e visualiza quem solicitou ➔ aprova ou nega ➔ o acesso concedido é registrado e pode ser **revogado a qualquer momento** pela startup.
 
 **Critérios de aceitação:**
 
 - Todo acesso a dado protegido gera registro de auditoria: quem acessou, o quê e quando.
 - Revogação surte efeito imediato na requisição seguinte.
 - Negativa não bloqueia futura solicitação, mas fica registrada.
+- A startup vê se o pedido veio de investidor ou de mentor antes de decidir (ADR 0031).
+- Existe no máximo um pedido pendente da mesma pessoa, pelo mesmo papel, para a mesma startup.
 
 ### RF14 — Direitos do titular (LGPD)
 
@@ -447,7 +458,7 @@ _Disciplina: Full Stack — requisito acrescentado_
 
 Complementa o match automático com descoberta ativa.
 
-**Filtros:** segmento, estágio, cidade, faixa de capital buscado, natureza da busca. **Ordenação:** score de afinidade ou data de cadastro.
+**Filtros:** segmento, estágio, cidade, faixa de capital buscado, natureza da busca. **Ordenação:** score de afinidade ou data de cadastro. Mentores com plano que inclui destaque aparecem priorizados na busca por mentoria, identificados como destaque (ADR 0029). O destaque não altera o score.
 
 **Critérios de aceitação:**
 
@@ -474,15 +485,22 @@ _Disciplinas: Full Stack / Empreendedorismo — requisito acrescentado_
 
 O modelo de receita é implementado no produto, e não apenas descrito no plano de negócios.
 
+**Planos por público e nível** (ADR 0028). Cada público — startup, investidor e mentor — tem três níveis: `GRATUITO`, `PRO` e `PREMIUM`. Pessoa com os dois papéis pode ter uma assinatura por papel.
+
 **O plano controla limites funcionais reais:**
 
-| Recurso                            | Plano gratuito | Plano pago     |
-| ---------------------------------- | -------------- | -------------- |
-| Cota de solicitações da startup    | Limitada       | Ampliada       |
-| Matches visíveis ao investidor     | Lista limitada | Lista completa |
-| Busca com filtro avançado          | Não            | Sim            |
-| Métricas de visualização de perfil | Não            | Sim            |
-| Exportação de relatórios           | Não            | Sim            |
+| Recurso                            | Público    | Gratuito       | Pagos (`PRO`, `PREMIUM`)  |
+| ---------------------------------- | ---------- | -------------- | ------------------------- |
+| Cota mensal de solicitações        | Startup    | Limitada       | Ampliada                  |
+| Matches visíveis                   | Investidor | Lista limitada | Lista ampliada a completa |
+| Limite mensal de aceites           | Mentor     | Limitado       | Ampliado                  |
+| Feedback detalhado por critério    | Mentor     | Não            | A definir por nível       |
+| Destaque na busca manual (RF15)    | Mentor     | Não            | A definir por nível       |
+| Busca com filtro avançado          | Todos      | Não            | A definir por nível       |
+| Métricas de visualização de perfil | Todos      | Não            | A definir por nível       |
+| Exportação de relatórios           | Todos      | Não            | A definir por nível       |
+
+O que diferencia `PRO` de `PREMIUM`, e os valores de cada limite, estão pendentes (seção 11).
 
 _Observação:_ a cota de solicitações não é um limite cosmético — é o mesmo mecanismo anti-ruído descrito no RF05. O plano e a proteção do lado escasso são servidos pela mesma regra.
 
@@ -494,7 +512,7 @@ _Observação:_ a cota de solicitações não é um limite cosmético — é o m
 
 | De                           | Para                         | Disparo                                           |
 | ---------------------------- | ---------------------------- | ------------------------------------------------- |
-| `SEM_PLANO`                  | `ATIVA`                      | Webhook de pagamento aprovado                     |
+| `SEM_PLANO`                  | `ATIVA`                      | Confirmação de pagamento aprovado pelo gateway    |
 | `ATIVA`                      | `CANCELADA_VIGENTE`          | Usuário cancela                                   |
 | `ATIVA`                      | `INADIMPLENTE_EM_TOLERANCIA` | Falha de cobrança                                 |
 | **`CANCELADA_VIGENTE`**      | **`ATIVA`**                  | **Usuário reativa, antes do fim do período pago** |
@@ -515,7 +533,8 @@ _Justificativa:_ obrigar a recontratar dentro do período vigente cria fricção
 - A reativação dentro do período vigente é possível, imediata e sem nova cobrança.
 - Falha de cobrança inicia janela de tolerância antes do rebaixamento, com notificação ao usuário.
 - O rebaixamento ao fim da vigência é automático.
-- **A liberação de plano ocorre exclusivamente por webhook validado**, nunca pelo retorno de navegação do usuário.
+- **A liberação de plano ocorre exclusivamente por confirmação do gateway** — webhook validado ou consulta feita pelo servidor —, nunca pelo retorno de navegação do usuário.
+- Uma rotina periódica do dispatcher consulta as cobranças no gateway e registra a confirmação que não chegou por webhook, pelo mesmo caminho de processamento. Cobrança já paga não produz efeito de novo (ADR 0035).
 - O webhook valida a assinatura do gateway antes de qualquer processamento — endpoint isento de CSRF não é endpoint isento de autenticação.
 - O processamento de webhook é **idempotente por ID de evento**.
 - A confirmação de pagamento e o trabalho decorrente são gravados na mesma transação, conforme o padrão outbox descrito na seção 8.4.
@@ -962,6 +981,8 @@ O plano gratuito do Render suspende o serviço após período sem tráfego. A pr
 
 **Confirmar a política de reenvio de webhook do gateway.** Com o outbox, o reenvio deixa de ser a rede de segurança principal, mas continua relevante para o caso em que o endpoint estiver indisponível no primeiro envio — situação em que nenhuma transação local existe para proteger o fato.
 
+**Confirmar que a API da AbacatePay permite consultar cobranças.** A reconciliação periódica (ADR 0035) cobre o webhook que nunca chegou — servidor fora do ar, hibernação do Render (8.2) — e depende dessa consulta. Sem ela, o reenvio do gateway volta a ser a única defesa nesse caso.
+
 **Máquina de estados no papel antes do código.** A tabela de transições do RF17 é a referência; nenhuma transição fora dela é válida. O diagrama resultante serve simultaneamente como artefato da documentação de governança e como base dos casos de teste de V&V — o mesmo trabalho atende duas disciplinas.
 
 **Nenhum dado de cartão trafega ou é armazenado pelo sistema.** O checkout ocorre em ambiente do gateway; a plataforma recebe apenas a confirmação via webhook. É o que dispensa a necessidade de conformidade PCI-DSS própria.
@@ -1089,7 +1110,7 @@ Executar o portão e falhar **não impede merge por si só**. O bloqueio efetivo
 | Falta de confiança sobre a seriedade dos perfis                                  | RF08, RF10, RF16             | RNF07         | Fila de aprovação com critérios explícitos e justificativa registrada; verificação com selo; rating interno com visibilidade assimétrica                                     |
 | Investidor é o lado escasso e sua atenção é o recurso disputado                  | RF05 (cota), RF15            | RNF05         | Cota de solicitações com débito no envio e devolução em recusa ou expiração; rotina agendada de expiração em 15 dias via fila                                                |
 | A mesma pessoa frequentemente atua como mentor e investidor                      | RF02, RF07                   | RNF09         | Cadastro único com papéis acumuláveis; permissão calculada dinamicamente a partir dos papéis ativos, não copiada na sessão                                                   |
-| O produto precisa de modelo de receita, mas não pode intermediar investimento    | RF17                         | RNF02         | Assinatura recorrente com checkout externo ao sistema; liberação exclusivamente por webhook idempotente; nenhum dado de cartão trafega pela aplicação                        |
+| O produto precisa de modelo de receita, mas não pode intermediar investimento    | RF17                         | RNF02         | Assinatura recorrente com checkout externo ao sistema; liberação exclusivamente por confirmação do gateway, idempotente; nenhum dado de cartão trafega pela aplicação        |
 | Decisões de moderação e acessos precisam ser justificáveis a posteriori          | RF08, RF13                   | RNF10         | Log somente escrita, tela de auditoria de leitura no painel administrativo, retenção definida em 12 meses                                                                    |
 | Titulares precisam poder sair da plataforma sem quebrar o histórico de terceiros | RF14                         | RNF03         | Exclusão por anonimização: dados pessoais removidos, registros de interação preservados sem identificação                                                                    |
 | Contas administrativas concentram poder sobre dados de todos                     | RF07                         | RNF02         | MFA por TOTP obrigatório para administrador, com códigos de recuperação; tipo de conta separado e não acumulável                                                             |
@@ -1103,18 +1124,18 @@ Executar o portão e falhar **não impede merge por si só**. O bloqueio efetivo
 
 ## 11. Pendências e próximos passos
 
-| #   | Pendência                                                                                                | Responsável / prazo sugerido               |
-| --- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| 1   | Definir a função da IA no produto (camada auxiliar) ou descartar o repositório                           | Grupo — antes do início do desenvolvimento |
-| 2   | Confirmar na documentação da AbacatePay o modelo exato de recorrência e a política de reenvio de webhook | Antes de implementar o RF17                |
-| 3   | Ambiente sandbox da AbacatePay confirmado e disponível                                                   | Concluído                                  |
-| 4   | Definir o padrão de logging antes da implementação dos workers                                           | Primeira semana                            |
-| 5   | Validar o fluxo de cookie entre domínios (7.1)                                                           | Primeira semana                            |
-| 6   | Tornar os três repositórios públicos e configurar proteção de `main`, `release` e `dev`                  | Primeira semana                            |
-| 7   | Definir os pesos exatos do score de afinidade (RF03)                                                     | Antes de implementar o motor               |
-| 8   | Definir os valores das cotas e o preço dos planos                                                        | Junto ao plano de negócios                 |
-| 9   | Realizar entrevistas de campo no Porto Digital para validar as personas                                  | Antes da entrega final                     |
-| 10  | Recrutar os 5 participantes do teste de usabilidade (RNF04)                                              | Antes da entrega final                     |
+| #   | Pendência                                                                                                                                                 | Responsável / prazo sugerido               |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 1   | Definir a função da IA no produto (camada auxiliar) ou descartar o repositório                                                                            | Grupo — antes do início do desenvolvimento |
+| 2   | Confirmar na documentação da AbacatePay o modelo exato de recorrência, a política de reenvio de webhook e se a API permite consultar cobranças (ADR 0035) | Antes de implementar o RF17                |
+| 3   | Ambiente sandbox da AbacatePay confirmado e disponível                                                                                                    | Concluído                                  |
+| 4   | Definir o padrão de logging antes da implementação dos workers                                                                                            | Primeira semana                            |
+| 5   | Validar o fluxo de cookie entre domínios (7.1)                                                                                                            | Primeira semana                            |
+| 6   | Tornar os três repositórios públicos e configurar proteção de `main`, `release` e `dev`                                                                   | Primeira semana                            |
+| 7   | Definir os pesos exatos do score de afinidade (RF03)                                                                                                      | Antes de implementar o motor               |
+| 8   | Definir os valores das cotas, dos limites e o preço dos nove planos, incluindo o que diferencia `PRO` de `PREMIUM` (ADR 0028)                             | Junto ao plano de negócios                 |
+| 9   | Realizar entrevistas de campo no Porto Digital para validar as personas                                                                                   | Antes da entrega final                     |
+| 10  | Recrutar os 5 participantes do teste de usabilidade (RNF04)                                                                                               | Antes da entrega final                     |
 
 ---
 
