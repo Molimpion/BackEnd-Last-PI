@@ -1,6 +1,6 @@
 # ADR 0006 — Padrão outbox no fluxo de pagamento
 
-**Status:** Aceito
+**Status:** Aceito — a liberação exclusiva por webhook foi substituída pelo [ADR 0035](./0035-reconciliacao-com-o-gateway.md)
 **Data:** 2026-09-13
 **Requisito:** RF17, RNF07, RNF10
 

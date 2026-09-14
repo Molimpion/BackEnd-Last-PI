@@ -16,39 +16,41 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 
 ## Documentação
 
-| Arquivo                            | O que é                                                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `Projeto_Matchmaking.md`           | Requisitos, personas, arquitetura e racional. Fonte da verdade sobre **o que** o sistema faz                 |
-| `CLAUDE.md`                        | Convenções de código, fronteira de camadas e o que não se decide sozinho. Lido por pessoas e por IAs         |
-| `CONTEXT.md`                       | Estado atual, decisões de configuração e próximo passo. A seção "Onde estamos" é do responsável técnico      |
-| `CONTRIBUTING.md`                  | Fluxo de branches, padrão de commit e checklist de PR                                                        |
-| `CHANGELOG.md`                     | Histórico de mudanças. **Só o responsável técnico edita**                                                    |
-| `README.md`                        | Como executar o projeto                                                                                      |
-| `docs/sumario.md`                  | Este arquivo                                                                                                 |
-| `docs/modelagem.md`                | Modelo de dados proposto e os oito pontos em aberto, três dos quais bloqueiam a primeira migration           |
-| `docs/proposta-listas-fechadas.md` | Os valores decididos para os três bloqueantes, para consulta rápida. Some quando os enums entrarem no schema |
-| `docs/perguntas-frequentes.md`     | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                       |
-| `docs/adr/README.md`               | Índice dos ADRs, agrupado por tema                                                                           |
-| `docs/adr/0001` a `0023`           | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                          |
-| `LICENSE`                          | Licença MIT                                                                                                  |
+| Arquivo                        | O que é                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `Projeto_Matchmaking.md`       | Requisitos, personas, arquitetura e racional. Fonte da verdade sobre **o que** o sistema faz            |
+| `CLAUDE.md`                    | Convenções de código, fronteira de camadas e o que não se decide sozinho. Lido por pessoas e por IAs    |
+| `CONTEXT.md`                   | Estado atual, decisões de configuração e próximo passo. A seção "Onde estamos" é do responsável técnico |
+| `CONTRIBUTING.md`              | Fluxo de branches, padrão de commit e checklist de PR                                                   |
+| `CHANGELOG.md`                 | Histórico de mudanças. **Só o responsável técnico edita**                                               |
+| `README.md`                    | Como executar o projeto                                                                                 |
+| `docs/sumario.md`              | Este arquivo                                                                                            |
+| `docs/modelagem.md`            | Modelo de dados decidido, com o ADR de cada decisão e os valores de negócio ainda em aberto             |
+| `docs/perguntas-frequentes.md` | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                  |
+| `docs/adr/README.md`           | Índice dos ADRs, agrupado por tema                                                                      |
+| `docs/adr/0001` a `0036`       | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                     |
+| `LICENSE`                      | Licença MIT                                                                                             |
 
 ## Código
 
-| Arquivo                   | O que faz                                                                                                                                                                        |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/api.ts`              | Entrypoint do processo **API**. Cria o servidor HTTP, escuta a porta e trata o encerramento gracioso                                                                             |
-| `src/worker.ts`           | Entrypoint do processo **worker**. Consumirá as filas do BullMQ                                                                                                                  |
-| `src/dispatcher.ts`       | Entrypoint do processo **dispatcher**. Varrerá o outbox e rodará as rotinas periódicas                                                                                           |
-| `src/app.ts`              | Monta o Express: helmet, CORS com credenciais, log de requisição, parser JSON, `/health` e tratador de erros. **Não abre porta** — é o que permite testar sem servidor pendurado |
-| `src/infra/env.ts`        | Valida as variáveis de ambiente com Zod na subida. O processo não inicia com variável faltando                                                                                   |
-| `src/infra/db.ts`         | Cliente Prisma com adapter `pg`                                                                                                                                                  |
-| `src/infra/redis.ts`      | Cliente ioredis                                                                                                                                                                  |
-| `src/infra/logger.ts`     | Log estruturado com pino, com redaction de cookie, senha e token                                                                                                                 |
-| `src/infra/errors.ts`     | `AppError`, os erros nomeados e o middleware que traduz erro em resposta HTTP                                                                                                    |
-| `src/generated/`          | Cliente Prisma **gerado**. Não versionado, não editar                                                                                                                            |
-| `tests/health.test.ts`    | Verifica que `GET /health` responde 200                                                                                                                                          |
-| `tests/errors.test.ts`    | Cobre os erros nomeados e o tratador, incluindo que a mensagem original do erro nao tratado nao vaza para o cliente                                                              |
-| `scripts/quality-gate.ts` | O portão de qualidade. Sete verificações, sem curto-circuito, falhando fechado                                                                                                   |
+| Arquivo                                | O que faz                                                                                                                                                                                                                                                                                  |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/api.ts`                           | Entrypoint do processo **API**. Cria o servidor HTTP, escuta a porta e trata o encerramento gracioso                                                                                                                                                                                       |
+| `src/worker.ts`                        | Entrypoint do processo **worker**. Consumirá as filas do BullMQ                                                                                                                                                                                                                            |
+| `src/dispatcher.ts`                    | Entrypoint do processo **dispatcher**. Varrerá o outbox e rodará as rotinas periódicas                                                                                                                                                                                                     |
+| `src/app.ts`                           | Monta o Express: helmet, CORS com credenciais, log de requisição, parser JSON, `/health` e tratador de erros. **Não abre porta** — é o que permite testar sem servidor pendurado                                                                                                           |
+| `src/infra/env.ts`                     | Valida as variáveis de ambiente com Zod na subida. O processo não inicia com variável faltando                                                                                                                                                                                             |
+| `src/infra/db.ts`                      | Cliente Prisma com adapter `pg`                                                                                                                                                                                                                                                            |
+| `src/infra/redis.ts`                   | Cliente ioredis                                                                                                                                                                                                                                                                            |
+| `src/infra/logger.ts`                  | Log estruturado com pino, com redaction de cookie, senha e token                                                                                                                                                                                                                           |
+| `src/infra/errors.ts`                  | `AppError`, os erros nomeados e o middleware que traduz erro em resposta HTTP                                                                                                                                                                                                              |
+| `src/features/<feature>/enums.ts`      | **Faz o papel do `types.ts`, só para enums.** Cópia dos enums do schema que a regra de negócio da feature usa, porque service e use case não podem importar de `generated/`. Nasce com a primeira feature que usar enum ([ADR 0036](./adr/0036-enums-do-dominio-como-copia-verificada.md)) |
+| `src/features/<feature>/enums.test.ts` | Confere que a cópia em `enums.ts` é igual ao enum do schema. Se alguém mudar o schema e esquecer a cópia, o CI reprova                                                                                                                                                                     |
+| `src/generated/`                       | Cliente Prisma **gerado**. Não versionado, não editar                                                                                                                                                                                                                                      |
+| `tests/health.test.ts`                 | Verifica que `GET /health` responde 200                                                                                                                                                                                                                                                    |
+| `tests/errors.test.ts`                 | Cobre os erros nomeados e o tratador, incluindo que a mensagem original do erro nao tratado nao vaza para o cliente                                                                                                                                                                        |
+| `tests/restricoes-do-banco.test.ts`    | Contra o Postgres real: confere os índices únicos parciais escritos à mão na migration inicial, que o `schema.prisma` não expressa                                                                                                                                                         |
+| `scripts/quality-gate.ts`              | O portão de qualidade. Sete verificações, sem curto-circuito, falhando fechado                                                                                                                                                                                                             |
 
 ## Configuração
 
@@ -68,7 +70,8 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `.husky/pre-commit`                    | Roda formatação e tipos antes do commit                               |
 | `.husky/commit-msg`                    | Roda o commitlint na mensagem                                         |
 | `.env.example`                         | Todas as variáveis necessárias, sem nenhum valor real                 |
-| `prisma/schema.prisma`                 | Modelo de dados. Ainda sem nenhum model                               |
+| `prisma/schema.prisma`                 | Modelo de dados: enums e as 25 entidades. Ver `docs/modelagem.md`     |
+| `prisma/migrations/`                   | Migrations. A inicial tem índices parciais escritos à mão no SQL      |
 | `prisma.config.ts`                     | Configuração do Prisma 7, incluindo a URL do banco                    |
 
 ## Infraestrutura e CI

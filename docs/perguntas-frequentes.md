@@ -44,16 +44,113 @@ porta aleatória. Se os dois fossem o mesmo arquivo, importar o app no teste já
 `listen()` na porta 3333 — dois testes em paralelo brigariam pela porta e a suíte não terminaria
 sozinha, porque teria um servidor vivo segurando o processo.
 
-## Se usamos Prisma, por que existe `src/generated/prisma/models.ts`?
+## O que é a pasta `src/generated/`?
 
-Esse arquivo **é** o Prisma. Não é código nosso, é saída do gerador.
+É o Prisma escrevendo o código de banco por nós. Não é código nosso, é saída do gerador.
 
-No Prisma 7 o cliente deixou de ser injetado dentro de `node_modules/.prisma` e passa a ser gerado
-como TypeScript de verdade no caminho definido em `output` (aqui, `src/generated/prisma`).
+A gente descreve o banco uma vez, no `prisma/schema.prisma`. O comando `prisma generate` lê esse
+arquivo e escreve duas coisas:
 
-A fonte da verdade continua sendo `prisma/schema.prisma`. Você escreve o model lá, roda
-`npx prisma generate`, e esses arquivos são reescritos. **Ninguém edita `src/generated/` à mão** —
-o diretório está no `.gitignore` e é regerado pelo `postinstall` a cada `npm ci`.
+1. **Os tipos.** O TypeScript passa a saber que `Startup` tem `nome`, `cidade`, `cnpj`, e que
+   `statusDeModeracao` só aceita `PENDENTE`, `APROVADO` ou `REPROVADO`. Quem digitar
+   `startup.nomee` vê o erro no editor, não em produção.
+2. **As funções.** `prisma.startup.findMany()`, `prisma.solicitacao.create()`, já tipadas: o
+   `where` só aceita colunas que existem, e o resultado vem com o tipo certo, inclusive com as
+   relações pedidas em `include`.
+
+A tradução é direta:
+
+| No schema                     | No TypeScript gerado          |
+| ----------------------------- | ----------------------------- |
+| `String`                      | `string`                      |
+| `String?`                     | `string \| null`              |
+| `DateTime`                    | `Date`                        |
+| `Segmento[]`                  | `Segmento[]`                  |
+| `Canvas?` (relação 1–1)       | `canvas: Canvas \| null`      |
+| `Solicitacao[]` (relação 1–N) | `solicitacoes: Solicitacao[]` |
+
+Analogia: o `schema.prisma` é a planta da casa e o `generated/` é o manual impresso a partir dela.
+Mudou a planta, imprime o manual de novo. Ninguém corrige o manual à caneta.
+
+**Três regras:**
+
+- **Não edite nada aí dentro.** O próximo `generate` apaga a edição.
+- **Não vai para o git.** O diretório está no `.gitignore` e é regerado pelo `postinstall` a cada
+  `npm ci`. Versionado, dois PRs que mexem no schema dariam conflito em milhares de linhas geradas.
+- **Mudou o `schema.prisma`, rode `npm run db:generate`.** Senão os tipos ficam desatualizados.
+
+**Isso é novo?** A geração existe desde o Prisma 2 (2020). O que mudou foi o lugar: até o Prisma 6,
+o gerador `prisma-client-js` escrevia em `node_modules/.prisma/client`, escondido — você importava
+`@prisma/client` e não via de onde vinham os tipos. No Prisma 7, o gerador `prisma-client` escreve
+TypeScript ESM na pasta definida em `output` (aqui, `src/generated/prisma`). É o mesmo mecanismo,
+agora visível.
+
+## A migration atualiza o `src/generated/`?
+
+**Não.** No Prisma 7, `prisma migrate dev` só altera o banco; não chama mais o `generate`, como
+fazia até o Prisma 6. São dois produtos do mesmo arquivo, e por isso dois comandos:
+
+```
+schema.prisma ──migrate──→ banco (tabelas)
+      │
+      └──────generate──→ src/generated/ (tipos e funções)
+```
+
+Por isso o script `npm run db:migrate` roda os dois em sequência (`prisma migrate dev && prisma
+generate`). Depois de mudar o schema, basta ele.
+
+Quem chamar `npx prisma migrate dev` direto, sem o script, precisa rodar `npm run db:generate` em
+seguida. Esquecer produz o sintoma mais confuso: a tabela nova existe no banco, mas o TypeScript diz
+que `prisma.tabelaNova` não existe.
+
+## Onde fica o `types.ts`? Como a regra de negócio usa um enum do banco?
+
+**Não existe `types.ts` global.** Nome genérico atrai qualquer tipo, e em pouco tempo o arquivo vira
+depósito. No lugar dele, cada feature tem um `enums.ts` — que faz o papel do `types.ts`, só que
+restrito a enums.
+
+O problema que ele resolve: a regra de negócio precisa saber, por exemplo, quais são os estados de
+uma assinatura. O Prisma já gera essa lista em `src/generated/prisma/enums.ts`, mas service e use
+case **não podem importar nada de `generated/`** — o lint recusa, para garantir que regra de negócio
+nunca acesse o banco direto.
+
+A solução ([ADR 0036](./adr/0036-enums-do-dominio-como-copia-verificada.md)) tem dois passos.
+
+**1. A feature escreve a própria cópia**, em `src/features/<feature>/enums.ts`:
+
+```ts
+export const statusDaAssinatura = [
+  "SEM_PLANO",
+  "ATIVA",
+  "CANCELADA_VIGENTE",
+  "INADIMPLENTE_EM_TOLERANCIA",
+  "ENCERRADA",
+] as const;
+
+export type StatusDaAssinatura = (typeof statusDaAssinatura)[number];
+```
+
+O use case importa daqui: `import type { StatusDaAssinatura } from "../enums.js"`.
+
+**2. Um teste confere que a cópia é igual à do schema**, em `src/features/<feature>/enums.test.ts`:
+
+```ts
+it("a lista de estados da assinatura é igual à do schema", () => {
+  expect([...statusDaAssinatura].sort()).toEqual(Object.values(StatusDaAssinatura).sort());
+});
+```
+
+Por que o teste importa: sem ele, alguém acrescenta `SUSPENSA` no schema, esquece a cópia, e o
+banco passa a aceitar um estado que a regra de negócio não conhece — sem erro nenhum. Com ele, o CI
+fica vermelho e o PR não entra até a cópia ser corrigida.
+
+**Regras:**
+
+- Mudou um enum no schema? Atualize o `enums.ts` de toda feature que o copia. O teste avisa se
+  esquecer.
+- O `enums.ts` **nunca** importa de `generated/`. Se importar, deixa de ser cópia.
+- Copie só o enum que a feature usa, não o schema inteiro.
+- Criou `enums.ts`? Crie o `enums.test.ts` no mesmo PR.
 
 ## Por que existe um `tsconfig.test.json` separado?
 

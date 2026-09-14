@@ -15,7 +15,7 @@ código errado com aparência de correto — o precedente do grupo está registr
 > **Esta seção é mantida pelo responsável técnico.** Não edite em PR. Se o seu PR implementa algo
 > listado abaixo como inexistente, diga isso na descrição do PR — a atualização acontece na revisão.
 
-**Repositório configurado. Nenhuma feature implementada.**
+**Repositório configurado e modelo de dados escrito. Nenhuma feature implementada.**
 
 Verificado rodando:
 
@@ -23,7 +23,14 @@ Verificado rodando:
 - `npm run quality` aprovando as sete verificações. Testado também que reprova: arquivo com `any`,
   `as any` e `@ts-expect-error` derrubou cinco verificações de uma vez, sem curto-circuito, e base
   de comparação inexistente reprovou como `NAO EXECUTOU`.
-- `npm run build`, `typecheck`, `lint`, `format:check` e a suíte (7 testes).
+- `npm run build`, `typecheck`, `lint`, `format:check` e a suíte (16 testes).
+- **Migration `modelagem_inicial` aplicada no Postgres local** do compose: 25 tabelas e os três
+  índices únicos parciais escritos à mão no SQL. O teste `tests/restricoes-do-banco.test.ts` foi
+  conferido nos dois sentidos — com os índices removidos, os três testes de recusa falharam; com os
+  índices recriados, passaram.
+- `npm run db:migrate` rodando `migrate dev` e `generate` em sequência.
+- **Fronteira de camadas no ESLint conferida por sonda:** controller, service e use case importando
+  `infra/db.js` ou `generated/prisma` reprovam; repository passa.
 - `npm run context` empacotando o repositório, com security check limpo e sem `.env` no pacote.
 - `npm run changelog:draft` agrupando commits convencionais por tipo.
 - **O CI rodou no GitHub Actions e passou**, em PR para `dev`, `release` e `main`. Dois fatos que
@@ -33,19 +40,23 @@ Verificado rodando:
 - **O fluxo `feature → dev → release → main` foi percorrido inteiro** (PRs #1, #2 e #3), com a
   proteção de branch já ativa.
 
-**Nunca executado:** o `docker-compose.yml`. Não há Docker neste devcontainer até o rebuild com a
-feature `docker-in-docker`.
+**Executado em parte:** o `docker-compose.yml`. Os serviços `postgres` e `redis` sobem saudáveis e
+foram usados para a migration e os testes. **Nunca executado:** o perfil `app` (API, worker e
+dispatcher em contêiner).
+
+**Ainda não verificado no CI:** a primeira migration real. Até aqui o `db:deploy` do workflow só
+rodou sem migration nenhuma; o teste de restrições depende dele aplicar a migration antes do portão.
 
 **Configuração do repositório:** público, com proteção em `main`, `release` e `dev` — job `quality`
 como _required status check_, `strict` ligado, `enforce_admins` ligado, sem force push e sem
 deleção. Revisão obrigatória está em **zero aprovações**, porque o GitHub não permite aprovar o
 próprio PR e hoje há um único revisor.
 
-**Não existe ainda:** model no `prisma/schema.prisma`, migration, `src/features/`, sessão,
-autenticação, especificação OpenAPI.
+**Não existe ainda:** `src/features/`, repository, sessão, autenticação, especificação OpenAPI,
+seed de `Plano`.
 
-`docs/modelagem.md` existe como **proposta** — nenhum model foi escrito no schema. As três listas
-fechadas de que ela dependia já foram decididas (ver "Próximo passo").
+O schema tem as 25 entidades descritas em `docs/modelagem.md`, com as decisões nos ADRs 0024 a 0035.
+Nenhuma regra de negócio está implementada sobre ele.
 
 O que existe de código é `src/app.ts` (helmet, CORS com credenciais, pino-http, JSON, `/health`,
 tratador de erros), os três entrypoints e `src/infra/` com env validado por Zod, Prisma com adapter
@@ -64,7 +75,7 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 | Prisma CLI fixado em 7.x                                         | O `latest` do npm aponta para `8.0.0-rc`                                                                                                  |
 | URL do banco via `process.env` direto em `prisma.config.ts`      | O helper `env()` resolve ao carregar o config e quebraria `npm ci` sem `.env`                                                             |
 | `multer-storage-cloudinary` removido                             | Prendia o `cloudinary` na 1.x (GHSA-g4mf-96x5-5m2c). Upload será `multer` memoryStorage + `upload_stream`                                 |
-| Fronteira de camadas aplicada por ESLint                         | `no-restricted-imports` recusa `express` em service/usecase e `@prisma/client` fora do repository                                         |
+| Fronteira de camadas aplicada por ESLint                         | `no-restricted-imports` recusa `express` em service/usecase e, fora do repository, `@prisma/client`, `infra/db.js` e `generated/prisma`   |
 | Vulnerabilidade no baseline por **ID de advisory**, não contagem | Contagem deixa passar advisory novo quando outro sai no mesmo PR                                                                          |
 | Portão roda os testes ele mesmo                                  | Se o workflow rodasse a suíte antes, uma falha impediria as outras seis verificações — o curto-circuito voltaria pela porta dos fundos    |
 | Changelog escrito à mão, rascunho gerado                         | Commit descreve o que o dev fez; changelog descreve o que mudou para quem usa                                                             |
@@ -96,34 +107,36 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 - `SESSION_SECRET` exige 32 caracteres (`src/infra/env.ts`) — limite escolhido na configuração, não
   especificado no documento.
 - Prettier não consta na tabela 6.3, que lista a ferramenta apenas para o front-end.
+- **Os três índices únicos parciais vivem só no SQL da migration inicial.** O `schema.prisma` não
+  os expressa. Regerar as migrations do zero os apaga sem erro; quem denuncia é o
+  `tests/restricoes-do-banco.test.ts`.
+- **Enum do schema usado na regra de negócio existe em dois lugares**: no schema e na cópia em
+  `src/features/<feature>/enums.ts` ([ADR 0036](./docs/adr/0036-enums-do-dominio-como-copia-verificada.md)).
+  O `enums.test.ts` da feature impede a divergência, mas só se for escrito junto com a cópia — o
+  revisor precisa cobrar.
+- **O teste de restrições grava e apaga linhas no banco apontado por `DATABASE_URL`.** Localmente é o
+  mesmo banco de desenvolvimento. Limpa o que cria, mas não isola de dado que já esteja lá.
+- **`mfaSegredo` precisa de chave de criptografia** em variável de ambiente, ainda não criada. Entra
+  no `.env.example` no PR do fluxo de MFA.
 
 ## Próximo passo
 
-**Modelagem de dados:** escrever os models do `prisma/schema.prisma` e gerar a primeira migration.
-A proposta de modelo já está em [`docs/modelagem.md`](./docs/modelagem.md).
+**Modelagem de dados escrita.** O `prisma/schema.prisma` tem as 25 entidades e a migration
+`modelagem_inicial` foi aplicada no Postgres local. Decisões e presunções em
+[`docs/modelagem.md`](./docs/modelagem.md), racional nos ADRs 0024 a 0035.
 
-**Os três pontos que bloqueavam a migration foram decididos.** Valores em
-[`docs/proposta-listas-fechadas.md`](./docs/proposta-listas-fechadas.md), racional nos ADRs 0024 a
-0027:
+As restrições que o Prisma não expressa — os três índices únicos parciais — estão cobertas por
+`tests/restricoes-do-banco.test.ts`. Confirmar no CI do PR que a migration é aplicada antes do portão.
 
-- `Segmento` com 12 valores, sem `OUTRO`. A startup marca **no máximo 2**, o investidor marca quantos
-  quiser, e **um segmento em comum já vale a pontuação cheia** no score.
-- Faixas de capital e ticket como **par de números em centavos**, teto obrigatório, mínimo R$ 1.000.
-  O front exibe agrupado; a API devolve o inteiro.
-- **9 áreas** de expertise do mentor, cada uma com **anos de experiência**. Como é autodeclaração, a
-  moderação confere contra o LinkedIn até a terceira avaliação; a partir dela, a nota das startups
-  substitui o declarado.
+Próxima frente: a primeira feature sobre o schema. A escolha de qual é do grupo.
 
-Duas decisões que vieram junto e mudam o que já estava escrito: **o perfil do investidor é visível às
-startups** (a nota dele continua só para o administrador), e **a moderação passa a ter critérios
-próprios por tipo de conta**, incluindo `PESSOA`.
-
-Com isso, o schema está destravado: escrever os models do `prisma/schema.prisma` e gerar a primeira
-migration.
+Os valores de negócio que continuam em aberto não bloqueiam o schema, mas bloqueiam a regra
+correspondente. A lista está no fim da `docs/modelagem.md`.
 
 Em paralelo, duas coisas de primeira semana que não dependem de código:
 
-- Rebuild do devcontainer e `docker compose up` funcionando.
+- `docker compose up` do perfil `app` (API, worker e dispatcher). Os serviços `postgres` e `redis`
+  já sobem e foram usados para gerar a migration.
 - Validar o fluxo de cookie entre domínios ([ADR 0015](./docs/adr/0015-cookie-entre-dominios-distintos.md)) —
   é o que se disfarça de bug de autenticação se for descoberto só na integração final.
 
