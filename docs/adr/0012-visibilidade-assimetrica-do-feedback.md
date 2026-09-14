@@ -1,6 +1,6 @@
 # ADR 0012 — Visibilidade assimétrica do feedback pós-interação
 
-**Status:** Aceito
+**Status:** Aceito — a parte referente ao mentor foi substituída pelo [ADR 0024](./0024-nota-do-mentor-e-publica.md)
 **Data:** 2026-09-13
 **Requisito:** RF10, RF08
 

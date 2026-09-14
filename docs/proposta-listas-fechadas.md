@@ -1,6 +1,7 @@
 # Proposta — as três listas fechadas que bloqueiam a primeira migration
 
-**Status:** itens 1 e 2 **decididos**. Item 3 aberto.
+**Status:** os três itens estão **decididos**. Este arquivo será apagado assim que os enums entrarem
+no `prisma/schema.prisma`.
 
 ## Decidido
 
@@ -20,6 +21,21 @@ precisa entrar na definição dos pesos.
 **Acréscimo relacionado:** o perfil do investidor é visível às startups, não só o contrário. Sem
 isso, a descoberta funcionaria em um sentido só. Registrado em
 [`modelagem.md`](./modelagem.md) e em [ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md).
+
+**3. Expertise do mentor.** As 9 áreas propostas abaixo, **sem `OPERACOES`** — era o valor mais vago
+e tenderia a virar caixa-de-tudo. Múltipla escolha, e cada área carrega **anos de experiência**, não
+um rótulo como "avançado": ano é fato conferível contra o LinkedIn, rótulo é opinião.
+
+Como anos de experiência é autodeclaração, a credibilidade vem em duas etapas:
+
+- **Até a terceira avaliação**, vale o declarado, conferido pela moderação contra o LinkedIn
+  ([ADR 0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md)).
+- **A partir da terceira**, a nota recebida das startups substitui a autoclassificação
+  ([ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)).
+- No cartão aparece **um** dos dois; no perfil expandido, os dois.
+
+Consequência de modelagem: área com nível deixa de ser lista simples e vira **tabela própria** — uma
+linha por área do mentor, com a área e os anos.
 
 O texto original de cada item fica abaixo, com o racional que levou à decisão.
 
