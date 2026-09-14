@@ -8,17 +8,24 @@ não foi construído da forma óbvia.
 
 ## Produto
 
-| #                                                                | Decisão                                                     | Status                               |
-| ---------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------ |
-| [0009](./0009-plataforma-de-conexao-nao-de-intermediacao.md)     | Plataforma de conexão, não de intermediação de investimento | Aceito                               |
-| [0010](./0010-tipo-de-conta-e-papeis-acumulaveis.md)             | Tipo de conta exclusivo com papéis acumuláveis              | Aceito                               |
-| [0003](./0003-score-deterministico.md)                           | Score de afinidade determinístico                           | Aceito                               |
-| [0004](./0004-cota-com-devolucao.md)                             | Cota de solicitações com devolução                          | Aceito                               |
-| [0012](./0012-visibilidade-assimetrica-do-feedback.md)           | Visibilidade assimétrica do feedback                        | Aceito — parte substituída pelo 0024 |
-| [0024](./0024-nota-do-mentor-e-publica.md)                       | A nota do mentor é pública; a do investidor não             | Aceito                               |
-| [0013](./0013-reativacao-sem-nova-cobranca.md)                   | Reativação dentro do período vigente, sem cobrança          | Aceito                               |
-| [0026](./0026-sobreposicao-de-segmentos-no-score.md)             | Sobreposição de segmentos no score é tudo ou nada           | Aceito                               |
-| [0027](./0027-valor-monetario-em-centavos-exibido-como-faixa.md) | Valor monetário em centavos, exibido como faixa             | Aceito                               |
+| #                                                                | Decisão                                                                     | Status                               |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------ |
+| [0009](./0009-plataforma-de-conexao-nao-de-intermediacao.md)     | Plataforma de conexão, não de intermediação de investimento                 | Aceito                               |
+| [0010](./0010-tipo-de-conta-e-papeis-acumulaveis.md)             | Tipo de conta exclusivo com papéis acumuláveis                              | Aceito                               |
+| [0003](./0003-score-deterministico.md)                           | Score de afinidade determinístico                                           | Aceito                               |
+| [0004](./0004-cota-com-devolucao.md)                             | Cota de solicitações com devolução                                          | Aceito                               |
+| [0012](./0012-visibilidade-assimetrica-do-feedback.md)           | Visibilidade assimétrica do feedback                                        | Aceito — parte substituída pelo 0024 |
+| [0024](./0024-nota-do-mentor-e-publica.md)                       | A nota do mentor é pública; a do investidor não                             | Aceito                               |
+| [0013](./0013-reativacao-sem-nova-cobranca.md)                   | Reativação dentro do período vigente, sem cobrança                          | Aceito                               |
+| [0026](./0026-sobreposicao-de-segmentos-no-score.md)             | Sobreposição de segmentos no score é tudo ou nada                           | Aceito                               |
+| [0027](./0027-valor-monetario-em-centavos-exibido-como-faixa.md) | Valor monetário em centavos, exibido como faixa                             | Aceito                               |
+| [0028](./0028-plano-por-publico-em-tres-niveis.md)               | Plano por público, em três níveis                                           | Aceito                               |
+| [0029](./0029-destaque-pago-do-mentor-na-busca.md)               | Destaque pago do mentor na busca manual                                     | Aceito                               |
+| [0030](./0030-solicitacao-a-investidor-e-mentor.md)              | Solicitação a investidor e mentor, com cota mensal e sem duplicata pendente | Aceito                               |
+| [0031](./0031-mentor-pode-pedir-acesso-ao-perfil-completo.md)    | Mentor também pode pedir acesso ao perfil completo                          | Aceito                               |
+| [0032](./0032-estados-da-reuniao-e-contraproposta.md)            | Estados da reunião e contraproposta como histórico                          | Aceito                               |
+| [0033](./0033-escala-e-criterios-do-feedback.md)                 | Escala e critérios do feedback                                              | Aceito                               |
+| [0034](./0034-notificacoes-de-seguranca.md)                      | Notificações de segurança entram na lista de tipos                          | Aceito                               |
 
 ## Segurança, privacidade e governança
 
@@ -34,15 +41,17 @@ não foi construído da forma óbvia.
 
 ## Arquitetura e implementação
 
-| #                                                        | Decisão                                                  | Status |
-| -------------------------------------------------------- | -------------------------------------------------------- | ------ |
-| [0007](./0007-express-em-vez-de-nest.md)                 | Express em vez de Nest.js ou Fastify                     | Aceito |
-| [0014](./0014-organizacao-por-feature.md)                | Código organizado por feature, não por categoria técnica | Aceito |
-| [0008](./0008-use-cases-restritos-a-dominios-pesados.md) | Casos de uso restritos aos domínios pesados              | Aceito |
-| [0006](./0006-outbox-no-pagamento.md)                    | Padrão outbox no fluxo de pagamento                      | Aceito |
-| [0015](./0015-cookie-entre-dominios-distintos.md)        | Cookie entre domínios distintos em vez de proxy          | Aceito |
-| [0016](./0016-front-consome-o-back-diretamente.md)       | Front-end consome o back-end diretamente                 | Aceito |
-| [0020](./0020-sentry-em-vez-de-prometheus-e-grafana.md)  | Sentry como observabilidade, sem Prometheus e Grafana    | Aceito |
+| #                                                        | Decisão                                                  | Status                                |
+| -------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------- |
+| [0007](./0007-express-em-vez-de-nest.md)                 | Express em vez de Nest.js ou Fastify                     | Aceito                                |
+| [0014](./0014-organizacao-por-feature.md)                | Código organizado por feature, não por categoria técnica | Aceito                                |
+| [0008](./0008-use-cases-restritos-a-dominios-pesados.md) | Casos de uso restritos aos domínios pesados              | Aceito                                |
+| [0006](./0006-outbox-no-pagamento.md)                    | Padrão outbox no fluxo de pagamento                      | Aceito — parte substituída pelo 0035  |
+| [0035](./0035-reconciliacao-com-o-gateway.md)            | Reconciliação periódica com o gateway de pagamento       | Aceito, condicionado à API do gateway |
+| [0036](./0036-enums-do-dominio-como-copia-verificada.md) | Enums do domínio como cópia verificada por teste         | Aceito                                |
+| [0015](./0015-cookie-entre-dominios-distintos.md)        | Cookie entre domínios distintos em vez de proxy          | Aceito                                |
+| [0016](./0016-front-consome-o-back-diretamente.md)       | Front-end consome o back-end diretamente                 | Aceito                                |
+| [0020](./0020-sentry-em-vez-de-prometheus-e-grafana.md)  | Sentry como observabilidade, sem Prometheus e Grafana    | Aceito                                |
 
 ## Processo e qualidade
 

@@ -75,6 +75,9 @@ Não é coincidência que os domínios com use case sejam os cinco fluxos críti
   `naoEncontrado`. Nomes que espelham conceito de framework mantêm o original (`AppError`,
   `Logger`).
 - **Sem `any`.** O portão conta ocorrências e reprova acima do baseline.
+- **Enum do schema na regra de negócio** vem de `src/features/<feature>/enums.ts`, cópia escrita à
+  mão, nunca de `generated/`. Toda cópia tem `enums.test.ts` conferindo igualdade com o schema
+  ([ADR 0036](./docs/adr/0036-enums-do-dominio-como-copia-verificada.md)).
 - **Entidade de persistência nunca cruza para o transporte.** Request e response separados da
   entidade — é o que impede hash de senha e campo interno vazarem numa serialização automática.
 - **Nome de teste descreve comportamento**, não implementação: "responde 400 quando falta a pauta",
@@ -90,7 +93,7 @@ Não é coincidência que os domínios com use case sejam os cinco fluxos críti
 | Cota debitada no **envio**, devolvida em recusa ou expiração | Debitar só no aceite incentiva disparo em massa; não devolver pune a startup por recusa alheia     |
 | Exclusão por **anonimização**, não remoção                   | Chat contém dado de terceiro e as métricas dependem dos registros de interação                     |
 | **Outbox** só no fluxo de pagamento                          | Não existe transação entre PostgreSQL e Redis. Aplicar a todo o sistema seria overhead sem retorno |
-| Liberação de plano **só por webhook validado**               | Nunca pelo retorno de navegação do usuário                                                         |
+| Liberação de plano **só por confirmação do gateway**         | Webhook validado ou consulta do servidor, pelo mesmo caminho. Nunca pelo retorno de navegação      |
 
 ## Armadilhas já mapeadas
 

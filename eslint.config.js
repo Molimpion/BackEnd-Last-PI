@@ -7,7 +7,7 @@ const semExpress = {
 };
 
 const semPrisma = {
-  name: "@prisma/client",
+  group: ["@prisma/client", "**/infra/db.js", "**/generated/prisma/**"],
   message: "Somente o repository conhece Prisma.",
 };
 
@@ -33,15 +33,19 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/features/*/service.ts", "src/features/*/usecases/**/*.ts"],
+    files: [
+      "src/features/*/service.ts",
+      "src/features/*/usecases/**/*.ts",
+      "src/features/*/enums.ts",
+    ],
     rules: {
-      "no-restricted-imports": ["error", { paths: [semExpress, semPrisma] }],
+      "no-restricted-imports": ["error", { paths: [semExpress], patterns: [semPrisma] }],
     },
   },
   {
     files: ["src/features/*/controller.ts"],
     rules: {
-      "no-restricted-imports": ["error", { paths: [semPrisma] }],
+      "no-restricted-imports": ["error", { patterns: [semPrisma] }],
     },
   },
   {
