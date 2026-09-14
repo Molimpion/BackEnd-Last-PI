@@ -44,16 +44,67 @@ porta aleatória. Se os dois fossem o mesmo arquivo, importar o app no teste já
 `listen()` na porta 3333 — dois testes em paralelo brigariam pela porta e a suíte não terminaria
 sozinha, porque teria um servidor vivo segurando o processo.
 
-## Se usamos Prisma, por que existe `src/generated/prisma/models.ts`?
+## O que é a pasta `src/generated/`?
 
-Esse arquivo **é** o Prisma. Não é código nosso, é saída do gerador.
+É o Prisma escrevendo o código de banco por nós. Não é código nosso, é saída do gerador.
 
-No Prisma 7 o cliente deixou de ser injetado dentro de `node_modules/.prisma` e passa a ser gerado
-como TypeScript de verdade no caminho definido em `output` (aqui, `src/generated/prisma`).
+A gente descreve o banco uma vez, no `prisma/schema.prisma`. O comando `prisma generate` lê esse
+arquivo e escreve duas coisas:
 
-A fonte da verdade continua sendo `prisma/schema.prisma`. Você escreve o model lá, roda
-`npx prisma generate`, e esses arquivos são reescritos. **Ninguém edita `src/generated/` à mão** —
-o diretório está no `.gitignore` e é regerado pelo `postinstall` a cada `npm ci`.
+1. **Os tipos.** O TypeScript passa a saber que `Startup` tem `nome`, `cidade`, `cnpj`, e que
+   `statusDeModeracao` só aceita `PENDENTE`, `APROVADO` ou `REPROVADO`. Quem digitar
+   `startup.nomee` vê o erro no editor, não em produção.
+2. **As funções.** `prisma.startup.findMany()`, `prisma.solicitacao.create()`, já tipadas: o
+   `where` só aceita colunas que existem, e o resultado vem com o tipo certo, inclusive com as
+   relações pedidas em `include`.
+
+A tradução é direta:
+
+| No schema                     | No TypeScript gerado          |
+| ----------------------------- | ----------------------------- |
+| `String`                      | `string`                      |
+| `String?`                     | `string \| null`              |
+| `DateTime`                    | `Date`                        |
+| `Segmento[]`                  | `Segmento[]`                  |
+| `Canvas?` (relação 1–1)       | `canvas: Canvas \| null`      |
+| `Solicitacao[]` (relação 1–N) | `solicitacoes: Solicitacao[]` |
+
+Analogia: o `schema.prisma` é a planta da casa e o `generated/` é o manual impresso a partir dela.
+Mudou a planta, imprime o manual de novo. Ninguém corrige o manual à caneta.
+
+**Três regras:**
+
+- **Não edite nada aí dentro.** O próximo `generate` apaga a edição.
+- **Não vai para o git.** O diretório está no `.gitignore` e é regerado pelo `postinstall` a cada
+  `npm ci`. Versionado, dois PRs que mexem no schema dariam conflito em milhares de linhas geradas.
+- **Mudou o `schema.prisma`, rode `npm run db:generate`.** Senão os tipos ficam desatualizados.
+
+**Isso é novo?** A geração existe desde o Prisma 2 (2020). O que mudou foi o lugar: até o Prisma 6,
+o gerador `prisma-client-js` escrevia em `node_modules/.prisma/client`, escondido — você importava
+`@prisma/client` e não via de onde vinham os tipos. No Prisma 7, o gerador `prisma-client` escreve
+TypeScript ESM na pasta definida em `output` (aqui, `src/generated/prisma`). É o mesmo mecanismo,
+agora visível.
+
+## A migration atualiza o `src/generated/`?
+
+**Não.** No Prisma 7, `prisma migrate dev` só altera o banco; não chama mais o `generate`, como
+fazia até o Prisma 6. São dois produtos do mesmo arquivo, e por isso dois comandos:
+
+```
+schema.prisma ──migrate──→ banco (tabelas)
+      │
+      └──────generate──→ src/generated/ (tipos e funções)
+```
+
+Depois de mudar o schema, rode os dois:
+
+```bash
+npm run db:migrate
+npm run db:generate
+```
+
+Esquecer o segundo produz o sintoma mais confuso: a tabela nova existe no banco, mas o TypeScript
+diz que `prisma.tabelaNova` não existe.
 
 ## Por que existe um `tsconfig.test.json` separado?
 
