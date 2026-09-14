@@ -96,15 +96,12 @@ schema.prisma ──migrate──→ banco (tabelas)
       └──────generate──→ src/generated/ (tipos e funções)
 ```
 
-Depois de mudar o schema, rode os dois:
+Por isso o script `npm run db:migrate` roda os dois em sequência (`prisma migrate dev && prisma
+generate`). Depois de mudar o schema, basta ele.
 
-```bash
-npm run db:migrate
-npm run db:generate
-```
-
-Esquecer o segundo produz o sintoma mais confuso: a tabela nova existe no banco, mas o TypeScript
-diz que `prisma.tabelaNova` não existe.
+Quem chamar `npx prisma migrate dev` direto, sem o script, precisa rodar `npm run db:generate` em
+seguida. Esquecer produz o sintoma mais confuso: a tabela nova existe no banco, mas o TypeScript diz
+que `prisma.tabelaNova` não existe.
 
 ## Por que existe um `tsconfig.test.json` separado?
 
