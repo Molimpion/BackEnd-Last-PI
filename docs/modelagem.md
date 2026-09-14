@@ -2,10 +2,11 @@
 
 Modelo do `prisma/schema.prisma`. Cada entidade aponta o requisito que a origina.
 
-> **Estado:** proposta. Nenhum model foi escrito no schema ainda. Os pontos marcados como
-> **em aberto** são valores de negócio que o [`Projeto_Matchmaking.md`](../Projeto_Matchmaking.md)
-> não define — eles precisam de decisão do grupo antes da primeira migration, não de escolha de quem
-> implementa.
+> **Estado:** proposta. Nenhum model foi escrito no schema ainda. As três listas fechadas que
+> bloqueavam a migration já foram decididas — valores em
+> [`proposta-listas-fechadas.md`](./proposta-listas-fechadas.md), racional nos ADRs 0024 a 0027. Os
+> pontos que restam **em aberto** são valores de negócio que o
+> [`Projeto_Matchmaking.md`](../Projeto_Matchmaking.md) não define e que não bloqueiam o schema.
 
 ## Convenções
 
@@ -25,6 +26,7 @@ erDiagram
     Conta ||--o| Pessoa : "tipo PESSOA"
     Pessoa ||--o| PerfilInvestidor : "papel INVESTIDOR"
     Pessoa ||--o| PerfilMentor : "papel MENTOR"
+    PerfilMentor ||--o{ AreaDeMentoria : declara
     Startup ||--o| Canvas : possui
     Startup ||--o{ Solicitacao : envia
     Pessoa ||--o{ Solicitacao : recebe
@@ -73,16 +75,23 @@ Modelar papel como tabela separada, e não como campo booleano em `Pessoa`, é o
 verificável ao critério "papel incompleto não participa do matchmaking": o papel existe quando a
 linha existe e está completa, não quando alguém marcou uma caixa.
 
-- `PerfilInvestidor`: segmentos de interesse, estágios de interesse, faixa de ticket, modelo de
-  negócio preferido.
-- `PerfilMentor`: áreas de expertise, disponibilidade em horas por mês.
+- `PerfilInvestidor`: segmentos de interesse (**sem limite de quantidade**), estágios de interesse,
+  faixa de ticket, modelo de negócio preferido.
+- `PerfilMentor`: disponibilidade em horas por mês, e a contagem de avaliações recebidas — é ela que
+  decide se o cartão mostra os anos declarados ou a nota ([ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)).
+- `AreaDeMentoria`: tabela própria, uma linha por área do mentor, com a área e os **anos de
+  experiência**. Vira tabela e não lista simples porque cada área carrega um valor junto.
 
 ## Startup e vitrine
 
 ### `Startup` — RF01, RF16
 
-Obrigatórios: nome, segmento, estágio, cidade, descrição curta, faixa de capital buscado, natureza
-da busca. Opcionais: CNPJ (startup em ideação frequentemente não tem), site, logotipo.
+Obrigatórios: nome, **segmentos** (um ou dois, nunca mais), estágio, cidade, descrição curta, faixa
+de capital buscado (`minimo` e `maximo` em centavos, teto obrigatório, mínimo R$ 1.000), natureza da
+busca. Opcionais: CNPJ (startup em ideação frequentemente não tem), site, logotipo.
+
+O limite de dois segmentos é regra de negócio, não de banco: o PostgreSQL aceita lista de enum, e a
+validação do tamanho vive no DTO.
 
 Campos de moderação e verificação: `statusDeModeracao`, `verificadaEm`, `vinculoPortoDigital`.
 
@@ -125,16 +134,33 @@ Integração com calendário externo está fora de escopo.
 
 Nota e campos estruturados, preenchido pelas duas partes após reunião marcada como realizada.
 
-**A visibilidade é assimétrica, e isso é modelado, não filtrado na aplicação:** a avaliação recebida
-pela startup aparece no perfil dela; a recebida pelo investidor ou mentor é visível **apenas ao
-administrador**. Um campo `visibilidade` na linha evita que a regra dependa de alguém lembrar de
-aplicar o filtro certo em cada consulta.
+**A visibilidade é modelada, não filtrada na aplicação.** Um campo `visibilidade` na linha evita que
+a regra dependa de alguém lembrar de aplicar o filtro certo em cada consulta.
+
+| Quem recebeu a avaliação | Quem vê                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| Startup                  | Qualquer usuário aprovado, no perfil dela                                                      |
+| Mentor                   | A startup, a partir da terceira avaliação ([ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)) |
+| Investidor               | **Apenas o administrador** ([ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md))    |
 
 ## Matchmaking
 
 O score do RF03 é **determinístico e calculado sob demanda** — ver
 [ADR 0003](./adr/0003-score-deterministico.md). Não existe tabela de match materializada: o score é
 função dos perfis, e perfil muda.
+
+### Visibilidade dos dois lados — acréscimo ao documento
+
+O RF04 define o perfil público **apenas da startup** e silencia sobre o investidor. Decisão tomada:
+**o perfil do investidor também é visível às startups** — tese, segmentos e estágios de interesse,
+faixa de ticket e modelo preferido.
+
+Sem isso a descoberta funcionaria em um sentido só, e o RF15 (busca e filtro manual) não teria o que
+a startup buscar.
+
+Não conflita com o [ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md): o que continua
+restrito ao administrador é a **nota** do investidor, não o perfil dele. Declarar a própria tese não
+afasta ninguém; ter a própria avaliação exposta, sim.
 
 ### `VisualizacaoDePerfil` — RF09
 
@@ -216,6 +242,9 @@ Definidos pelo documento:
 
 Não escreva a primeira migration sem resolver estes pontos. Todos são lista fechada ou valor de
 negócio que o documento exige mas não define.
+
+> Os três primeiros — os que **bloqueavam** a migration — já foram decididos. Os valores estão em
+> [`proposta-listas-fechadas.md`](./proposta-listas-fechadas.md) e o racional nos ADRs 0024 a 0027.
 
 | #   | O que falta                                         | Por que trava                                                                                                                                                                     |
 | --- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
