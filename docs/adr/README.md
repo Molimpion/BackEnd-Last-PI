@@ -41,15 +41,16 @@ não foi construído da forma óbvia.
 
 ## Arquitetura e implementação
 
-| #                                                        | Decisão                                                  | Status |
-| -------------------------------------------------------- | -------------------------------------------------------- | ------ |
-| [0007](./0007-express-em-vez-de-nest.md)                 | Express em vez de Nest.js ou Fastify                     | Aceito |
-| [0014](./0014-organizacao-por-feature.md)                | Código organizado por feature, não por categoria técnica | Aceito |
-| [0008](./0008-use-cases-restritos-a-dominios-pesados.md) | Casos de uso restritos aos domínios pesados              | Aceito |
-| [0006](./0006-outbox-no-pagamento.md)                    | Padrão outbox no fluxo de pagamento                      | Aceito |
-| [0015](./0015-cookie-entre-dominios-distintos.md)        | Cookie entre domínios distintos em vez de proxy          | Aceito |
-| [0016](./0016-front-consome-o-back-diretamente.md)       | Front-end consome o back-end diretamente                 | Aceito |
-| [0020](./0020-sentry-em-vez-de-prometheus-e-grafana.md)  | Sentry como observabilidade, sem Prometheus e Grafana    | Aceito |
+| #                                                        | Decisão                                                  | Status                                |
+| -------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------- |
+| [0007](./0007-express-em-vez-de-nest.md)                 | Express em vez de Nest.js ou Fastify                     | Aceito                                |
+| [0014](./0014-organizacao-por-feature.md)                | Código organizado por feature, não por categoria técnica | Aceito                                |
+| [0008](./0008-use-cases-restritos-a-dominios-pesados.md) | Casos de uso restritos aos domínios pesados              | Aceito                                |
+| [0006](./0006-outbox-no-pagamento.md)                    | Padrão outbox no fluxo de pagamento                      | Aceito — parte substituída pelo 0035  |
+| [0035](./0035-reconciliacao-com-o-gateway.md)            | Reconciliação periódica com o gateway de pagamento       | Aceito, condicionado à API do gateway |
+| [0015](./0015-cookie-entre-dominios-distintos.md)        | Cookie entre domínios distintos em vez de proxy          | Aceito                                |
+| [0016](./0016-front-consome-o-back-diretamente.md)       | Front-end consome o back-end diretamente                 | Aceito                                |
+| [0020](./0020-sentry-em-vez-de-prometheus-e-grafana.md)  | Sentry como observabilidade, sem Prometheus e Grafana    | Aceito                                |
 
 ## Processo e qualidade
 

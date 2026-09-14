@@ -61,7 +61,7 @@ natureza do cadastro; o papel só existe dentro de `PESSOA` e é acumulável.
 | `email`             | Único                                                                    |
 | `senhaHash`         | bcrypt ou argon2. **Nunca criptografia reversível** (RNF02)              |
 | `tipo`              | `TipoDeConta`                                                            |
-| `status`            | `StatusDaConta`                                                          |
+| `status`            | `StatusDaConta`, nasce `ATIVA`                                           |
 | `emailVerificadoEm` | Verificação obrigatória antes do primeiro login                          |
 | `mfaSegredo`        | TOTP. Opcional para startup e pessoa, **obrigatório** para administrador |
 | `mfaAtivadoEm`      | Nulo enquanto o segundo fator não estiver ativo                          |
@@ -71,6 +71,15 @@ natureza do cadastro; o papel só existe dentro de `PESSOA` e é acumulável.
 "conta inativada, suspensa ou reprovada não autentica". Reprovação **não** vira status da conta: ela
 já vive em `statusDeModeracao`, e duplicá-la permitiria os dois campos divergirem. E-mail não
 verificado também não vira status, porque `emailVerificadoEm` já registra isso.
+
+**A conta nasce `ATIVA`.** Quem barra o primeiro login é `emailVerificadoEm`; nascer `INATIVA` exigiria
+um passo de ativação sem ganho.
+
+**`mfaSegredo` é criptografado, não hasheado.** A senha nunca precisa ser lida de volta; o segredo
+TOTP precisa, porque o servidor calcula o código esperado a partir dele. Por isso a regra do RNF02
+("nunca criptografia reversível") vale para a senha e **não** para o segredo TOTP, que é cifrado na
+aplicação com uma chave em variável de ambiente. A variável entra no `.env.example` no PR do fluxo
+de MFA. Gravar em texto puro deixaria o segundo fator exposto em qualquer vazamento do banco.
 
 A conta de administrador é criada apenas por outro administrador, nunca por cadastro público.
 
@@ -91,8 +100,11 @@ Modelar papel como tabela separada, e não como campo booleano em `Pessoa`, é o
 verificável ao critério "papel incompleto não participa do matchmaking": o papel existe quando a
 linha existe e está completa, não quando alguém marcou uma caixa.
 
-- **`PerfilInvestidor`:** tese, segmentos de interesse, estágios de interesse, faixa de ticket
-  (`ticketMinimo` e `ticketMaximo` em centavos), modelo de negócio preferido.
+- **`PerfilInvestidor`:** segmentos de interesse, estágios de interesse, faixa de ticket
+  (`ticketMinimo` e `ticketMaximo` em centavos), modelo de negócio preferido, e `tese`.
+  - `tese` é **texto livre opcional**, além dos campos estruturados. O RF02 não o pede: a tese já é
+    expressa pelos campos marcados. O texto existe para o investidor dizer o que as opções não
+    cobrem ("founders técnicos, impacto no Nordeste"), aparece no perfil e **não entra no score**.
   - Segmentos: **no mínimo 1, sem máximo**.
   - Estágios: **no mínimo 1**.
   - Com zero em qualquer um dos dois, o critério correspondente do score nunca pontua e o investidor
@@ -118,6 +130,11 @@ validação do tamanho vive no DTO.
 contrato) e o moderador confere. Um booleano não daria ao moderador nada para conferir contra o
 critério de "vínculo comprovável" do [ADR 0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md).
 
+**CNPJ pode repetir, e a repetição é sinalizada à moderação.** Uma empresa com dois produtos pode
+cadastrar os dois como startups. Bloquear com `@unique` impediria esse caso; permitir em silêncio
+deixaria passar quem copia o CNPJ de outra empresa. O campo tem índice, e a tela de moderação mostra
+as outras startups com o mesmo CNPJ.
+
 Criada com `statusDeModeracao = PENDENTE` e **não aparece em matchmaking nem em busca** até ser
 aprovada (RF08, RF16).
 
@@ -134,8 +151,15 @@ Relação 1-para-1 com `Startup`. Um campo por bloco: problema, solução, propo
 mercado, tração, modelo de receita.
 
 Blocos como colunas nomeadas, e não como JSON genérico, porque a comparabilidade entre startups é o
-ponto do requisito — e porque `canvasCompleto` precisa ser verificável para a startup se tornar
-elegível ao matchmaking.
+ponto do requisito.
+
+**Os seis blocos são obrigatórios e o Canvas é salvo inteiro.** A linha de `Canvas` só existe
+completa, então "a startup tem Canvas" e "o Canvas está completo" são a mesma pergunta — sem campo
+calculado nem estado intermediário.
+
+O custo é que o Canvas é o trecho mais longo do cadastro, e perder o texto ao fechar a aba é causa
+comum de abandono. Sugestão ao front: rascunho guardado no navegador enquanto a startup escreve.
+Nada disso passa pelo backend.
 
 ## Conexão
 
@@ -260,6 +284,10 @@ público do plano é ignorada.
 | `metricasDeVisualizacao`   | Todos      | Boolean  |
 | `exportacaoDeRelatorios`   | Todos      | Boolean  |
 
+**Os booleanos não têm valor padrão.** Quem cadastra um plano precisa declarar cada recurso; o banco
+recusa a linha com recurso sem resposta. Com padrão `false`, esquecer um campo tiraria o recurso de
+quem pagou sem ninguém perceber.
+
 ### `Assinatura` — RF17
 
 Estados: `SEM_PLANO`, `ATIVA`, `CANCELADA_VIGENTE`, `INADIMPLENTE_EM_TOLERANCIA`, `ENCERRADA`. A
@@ -274,10 +302,26 @@ entre colunas de tabelas diferentes.
 Uma linha por cobrança da assinatura, para o histórico de cobranças do RF17. Estados: `PENDENTE`,
 `PAGA`, `FALHOU`, `ESTORNADA`. Valor em centavos e ID da cobrança no gateway, único.
 
-### `EventoDeWebhook` — RF17
+### `EventoDoGateway` — RF17
 
-Todo webhook recebido é registrado com payload, resultado do processamento e data. Restrição de
-unicidade no ID do evento do gateway — é a primeira das três defesas de idempotência da seção 8.4.
+Todo aviso do gateway é registrado com payload, data de recebimento, data de processamento e erro.
+A `origem` diz de onde veio: `WEBHOOK` ou `RECONCILIACAO`
+([ADR 0035](./adr/0035-reconciliacao-com-o-gateway.md)).
+
+- **Processado com sucesso:** `processadoEm` preenchido e `erro` nulo.
+- **Falhou:** `erro` preenchido.
+- **Travado:** `processadoEm` nulo há mais tempo que o esperado. É o aviso que chegou e ninguém
+  terminou de tratar.
+
+O que o registro **não** encontra é o webhook que nunca chegou. Esse caso é coberto pela rotina de
+reconciliação do dispatcher, que consulta o gateway e grava o evento que faltou com
+`origem = RECONCILIACAO`, seguindo o mesmo caminho do webhook.
+
+`idDoEventoNoGateway` é único e nulo no evento de reconciliação, que não tem ID de evento do gateway;
+`idDaCobrancaNoGateway` liga o evento à cobrança nas duas origens. A unicidade do ID do evento
+deduplica webhook repetido. A deduplicação **entre origens**
+é a transição condicional de `Cobranca` de `PENDENTE` para `PAGA`: quem chega em segundo não altera
+linha nenhuma.
 
 ### `TrabalhoPendente` (outbox) — seção 8.4
 
@@ -306,14 +350,41 @@ marketing é justamente o que ele pode retirar sem sair da plataforma.
 Quem, o quê, quando e de onde (IP). **Somente escrita** — nem o administrador edita ou remove.
 Retenção de 12 meses. Sem `atualizadoEm`, por ser log.
 
-Registra: ações de moderação, concessão e revogação de acesso a dado protegido, alterações de
-assinatura e eventos de pagamento, alterações de papel, tentativas de login malsucedidas, e os
-próprios acessos à tela de auditoria. O ator é nulo na tentativa de login com e-mail inexistente.
+**A ação é enum (`AcaoDeAuditoria`), não texto livre.** Com texto livre, um registro grava "aprovou
+startup" e outro "startup aprovada", e a pesquisa encontra só metade. O custo aceito é que ação nova
+exige migration.
+
+| Ação                      | Quando                           | Origem      |
+| ------------------------- | -------------------------------- | ----------- |
+| `MODERACAO_APROVADA`      | Administrador aprova cadastro    | RNF10       |
+| `MODERACAO_REPROVADA`     | Administrador reprova cadastro   | RNF10       |
+| `ACESSO_CONCEDIDO`        | Startup libera o perfil completo | RNF10, RF13 |
+| `ACESSO_NEGADO`           | Startup nega o pedido de acesso  | RF13        |
+| `ACESSO_REVOGADO`         | Startup revoga acesso concedido  | RNF10, RF13 |
+| `DADO_PROTEGIDO_ACESSADO` | Alguém abre dado protegido       | RF13        |
+| `ASSINATURA_ALTERADA`     | Assinatura muda de estado        | RNF10       |
+| `PAGAMENTO_REGISTRADO`    | Evento do gateway processado     | RNF10       |
+| `PAPEL_ADICIONADO`        | Pessoa ganha papel               | RNF10       |
+| `PAPEL_REMOVIDO`          | Pessoa perde papel               | RNF10       |
+| `LOGIN_FALHOU`            | Tentativa de login malsucedida   | RNF10       |
+| `AUDITORIA_CONSULTADA`    | Administrador abre a auditoria   | RNF10       |
+| `CONTA_EXCLUIDA`          | Titular exclui a conta           | RF14        |
+| `ADMINISTRADOR_CRIADO`    | Administrador cria outro         | ADR 0025    |
+| `CONTA_SUSPENSA`          | Administrador suspende conta     | Decisão     |
+| `CONTA_REATIVADA`         | Administrador tira a suspensão   | Decisão     |
+| `SENHA_ALTERADA`          | Titular muda ou redefine a senha | Decisão     |
+
+As três últimas não estão no RNF10 e foram acrescentadas por decisão do grupo. O detalhe de cada
+registro (de qual estado para qual, qual papel) vai em `metadados`. O ator é nulo na tentativa de
+login com e-mail inexistente.
 
 ### `Notificacao` e `PreferenciaDeNotificacao` — RF12
 
 Notificação in-app com histórico. `PreferenciaDeNotificacao` guarda, por conta e tipo, se o usuário
 recebe por e-mail.
+
+**`lidaEm` marca a notificação como lida.** O RF12 fala só em histórico; o campo existe para o
+contador de não lidas no ícone de notificações.
 
 `TipoDeNotificacao` segue os eventos do RF12, mais três de segurança
 ([ADR 0034](./adr/0034-notificacoes-de-seguranca.md)). Os de moderação, segurança e assinatura
@@ -340,6 +411,8 @@ recebe por e-mail.
 | `NivelDoPlano`           | `GRATUITO`, `PRO`, `PREMIUM`                                                                                                                                                                                                                                                                                                                                                       | RF17, ADR 0028        |
 | `StatusDaAssinatura`     | `SEM_PLANO`, `ATIVA`, `CANCELADA_VIGENTE`, `INADIMPLENTE_EM_TOLERANCIA`, `ENCERRADA`                                                                                                                                                                                                                                                                                               | RF17                  |
 | `StatusDaCobranca`       | `PENDENTE`, `PAGA`, `FALHOU`, `ESTORNADA`                                                                                                                                                                                                                                                                                                                                          | RF17, ADR 0028        |
+| `OrigemDoEvento`         | `WEBHOOK`, `RECONCILIACAO`                                                                                                                                                                                                                                                                                                                                                         | RF17, ADR 0035        |
+| `AcaoDeAuditoria`        | Ver `RegistroDeAuditoria`                                                                                                                                                                                                                                                                                                                                                          | RNF10, RF13, RF14     |
 | `TipoDeConsentimento`    | `TERMOS_DE_USO`, `TRATAMENTO_DE_DADOS`, `COMUNICACOES_DE_MARKETING`                                                                                                                                                                                                                                                                                                                | RF11                  |
 | `TipoDeNotificacao`      | `SOLICITACAO_RECEBIDA`, `SOLICITACAO_ACEITA`, `SOLICITACAO_RECUSADA`, `SOLICITACAO_PRESTES_A_EXPIRAR`, `MENSAGEM_RECEBIDA`, `REUNIAO_PROPOSTA`, `REUNIAO_CONFIRMADA`, `REUNIAO_RECUSADA`, `CADASTRO_APROVADO`, `CADASTRO_REPROVADO`, `COBRANCA_APROVADA`, `COBRANCA_FALHOU`, `ASSINATURA_PRESTES_A_VENCER`, `ASSINATURA_REBAIXADA`, `LOGIN_NOVO`, `SENHA_ALTERADA`, `MFA_ALTERADO` | RF12, ADR 0034        |
 
@@ -359,3 +432,5 @@ Nenhum destes muda a estrutura do schema. Todos impedem implementar a regra corr
 | O que dispara `LOGIN_NOVO` e `MFA_ALTERADO`                                     | RF12      | ADR 0034             |
 | O que acontece com a assinatura quando a pessoa perde o papel                   | RF17      | ADR 0028             |
 | Validação da escala do feedback na rodada beta                                  | RF10      | ADR 0033             |
+| Se a API da AbacatePay permite consultar cobranças (condição da reconciliação)  | RF17      | ADR 0035, seção 11   |
+| Intervalo da reconciliação e janela de cobranças consultadas                    | RF17      | ADR 0035             |

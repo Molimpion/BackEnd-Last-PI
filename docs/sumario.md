@@ -29,7 +29,7 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `docs/proposta-listas-fechadas.md` | Os valores decididos para os três bloqueantes, para consulta rápida. Some quando os enums entrarem no schema |
 | `docs/perguntas-frequentes.md`     | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                       |
 | `docs/adr/README.md`               | Índice dos ADRs, agrupado por tema                                                                           |
-| `docs/adr/0001` a `0034`           | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                          |
+| `docs/adr/0001` a `0035`           | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                          |
 | `LICENSE`                          | Licença MIT                                                                                                  |
 
 ## Código
