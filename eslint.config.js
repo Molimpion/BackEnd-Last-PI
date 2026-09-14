@@ -33,7 +33,11 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/features/*/service.ts", "src/features/*/usecases/**/*.ts"],
+    files: [
+      "src/features/*/service.ts",
+      "src/features/*/usecases/**/*.ts",
+      "src/features/*/enums.ts",
+    ],
     rules: {
       "no-restricted-imports": ["error", { paths: [semExpress], patterns: [semPrisma] }],
     },

@@ -110,9 +110,10 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 - **Os três índices únicos parciais vivem só no SQL da migration inicial.** O `schema.prisma` não
   os expressa. Regerar as migrations do zero os apaga sem erro; quem denuncia é o
   `tests/restricoes-do-banco.test.ts`.
-- **A regra de camadas barra também os enums gerados em service e use case.** O padrão
-  `generated/prisma/**` inclui `enums.js`. Quando a primeira regra de negócio precisar de um enum
-  (`StatusDaAssinatura`, por exemplo), decidir entre liberar `enums.js` ou declarar o tipo no domínio.
+- **Enum do schema usado na regra de negócio existe em dois lugares**: no schema e na cópia em
+  `src/features/<feature>/enums.ts` ([ADR 0036](./docs/adr/0036-enums-do-dominio-como-copia-verificada.md)).
+  O `enums.test.ts` da feature impede a divergência, mas só se for escrito junto com a cópia — o
+  revisor precisa cobrar.
 - **O teste de restrições grava e apaga linhas no banco apontado por `DATABASE_URL`.** Localmente é o
   mesmo banco de desenvolvimento. Limpa o que cria, mas não isola de dado que já esteja lá.
 - **`mfaSegredo` precisa de chave de criptografia** em variável de ambiente, ainda não criada. Entra

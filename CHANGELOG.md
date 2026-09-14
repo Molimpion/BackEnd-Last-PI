@@ -48,10 +48,10 @@ Seções usadas: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`
   pendente duplicada, pedido de acesso pendente duplicado e duas reuniões ativas na mesma
   solicitação.
 - Teste de integração contra o PostgreSQL real cobrindo esses três índices.
-- ADRs 0028 a 0035: planos por público em três níveis, destaque pago do mentor na busca,
+- ADRs 0028 a 0036: planos por público em três níveis, destaque pago do mentor na busca,
   solicitação a investidor e mentor com cota mensal, acesso do mentor ao perfil completo, estados da
   reunião, escala e critérios do feedback, notificações de segurança e reconciliação periódica com o
-  gateway de pagamento.
+  gateway de pagamento, e enums do domínio como cópia verificada por teste.
 - Perguntas frequentes sobre a pasta `src/generated/` e sobre a relação entre migration e geração do
   cliente.
 

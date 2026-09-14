@@ -103,6 +103,55 @@ Quem chamar `npx prisma migrate dev` direto, sem o script, precisa rodar `npm ru
 seguida. Esquecer produz o sintoma mais confuso: a tabela nova existe no banco, mas o TypeScript diz
 que `prisma.tabelaNova` não existe.
 
+## Onde fica o `types.ts`? Como a regra de negócio usa um enum do banco?
+
+**Não existe `types.ts` global.** Nome genérico atrai qualquer tipo, e em pouco tempo o arquivo vira
+depósito. No lugar dele, cada feature tem um `enums.ts` — que faz o papel do `types.ts`, só que
+restrito a enums.
+
+O problema que ele resolve: a regra de negócio precisa saber, por exemplo, quais são os estados de
+uma assinatura. O Prisma já gera essa lista em `src/generated/prisma/enums.ts`, mas service e use
+case **não podem importar nada de `generated/`** — o lint recusa, para garantir que regra de negócio
+nunca acesse o banco direto.
+
+A solução ([ADR 0036](./adr/0036-enums-do-dominio-como-copia-verificada.md)) tem dois passos.
+
+**1. A feature escreve a própria cópia**, em `src/features/<feature>/enums.ts`:
+
+```ts
+export const statusDaAssinatura = [
+  "SEM_PLANO",
+  "ATIVA",
+  "CANCELADA_VIGENTE",
+  "INADIMPLENTE_EM_TOLERANCIA",
+  "ENCERRADA",
+] as const;
+
+export type StatusDaAssinatura = (typeof statusDaAssinatura)[number];
+```
+
+O use case importa daqui: `import type { StatusDaAssinatura } from "../enums.js"`.
+
+**2. Um teste confere que a cópia é igual à do schema**, em `src/features/<feature>/enums.test.ts`:
+
+```ts
+it("a lista de estados da assinatura é igual à do schema", () => {
+  expect([...statusDaAssinatura].sort()).toEqual(Object.values(StatusDaAssinatura).sort());
+});
+```
+
+Por que o teste importa: sem ele, alguém acrescenta `SUSPENSA` no schema, esquece a cópia, e o
+banco passa a aceitar um estado que a regra de negócio não conhece — sem erro nenhum. Com ele, o CI
+fica vermelho e o PR não entra até a cópia ser corrigida.
+
+**Regras:**
+
+- Mudou um enum no schema? Atualize o `enums.ts` de toda feature que o copia. O teste avisa se
+  esquecer.
+- O `enums.ts` **nunca** importa de `generated/`. Se importar, deixa de ser cópia.
+- Copie só o enum que a feature usa, não o schema inteiro.
+- Criou `enums.ts`? Crie o `enums.test.ts` no mesmo PR.
+
 ## Por que existe um `tsconfig.test.json` separado?
 
 Porque testes e scripts precisam de opções diferentes do código de produção — hoje, `types` incluindo

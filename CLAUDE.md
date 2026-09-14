@@ -75,6 +75,9 @@ Não é coincidência que os domínios com use case sejam os cinco fluxos críti
   `naoEncontrado`. Nomes que espelham conceito de framework mantêm o original (`AppError`,
   `Logger`).
 - **Sem `any`.** O portão conta ocorrências e reprova acima do baseline.
+- **Enum do schema na regra de negócio** vem de `src/features/<feature>/enums.ts`, cópia escrita à
+  mão, nunca de `generated/`. Toda cópia tem `enums.test.ts` conferindo igualdade com o schema
+  ([ADR 0036](./docs/adr/0036-enums-do-dominio-como-copia-verificada.md)).
 - **Entidade de persistência nunca cruza para o transporte.** Request e response separados da
   entidade — é o que impede hash de senha e campo interno vazarem numa serialização automática.
 - **Nome de teste descreve comportamento**, não implementação: "responde 400 quando falta a pauta",
