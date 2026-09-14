@@ -33,21 +33,22 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 
 ## Código
 
-| Arquivo                   | O que faz                                                                                                                                                                        |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/api.ts`              | Entrypoint do processo **API**. Cria o servidor HTTP, escuta a porta e trata o encerramento gracioso                                                                             |
-| `src/worker.ts`           | Entrypoint do processo **worker**. Consumirá as filas do BullMQ                                                                                                                  |
-| `src/dispatcher.ts`       | Entrypoint do processo **dispatcher**. Varrerá o outbox e rodará as rotinas periódicas                                                                                           |
-| `src/app.ts`              | Monta o Express: helmet, CORS com credenciais, log de requisição, parser JSON, `/health` e tratador de erros. **Não abre porta** — é o que permite testar sem servidor pendurado |
-| `src/infra/env.ts`        | Valida as variáveis de ambiente com Zod na subida. O processo não inicia com variável faltando                                                                                   |
-| `src/infra/db.ts`         | Cliente Prisma com adapter `pg`                                                                                                                                                  |
-| `src/infra/redis.ts`      | Cliente ioredis                                                                                                                                                                  |
-| `src/infra/logger.ts`     | Log estruturado com pino, com redaction de cookie, senha e token                                                                                                                 |
-| `src/infra/errors.ts`     | `AppError`, os erros nomeados e o middleware que traduz erro em resposta HTTP                                                                                                    |
-| `src/generated/`          | Cliente Prisma **gerado**. Não versionado, não editar                                                                                                                            |
-| `tests/health.test.ts`    | Verifica que `GET /health` responde 200                                                                                                                                          |
-| `tests/errors.test.ts`    | Cobre os erros nomeados e o tratador, incluindo que a mensagem original do erro nao tratado nao vaza para o cliente                                                              |
-| `scripts/quality-gate.ts` | O portão de qualidade. Sete verificações, sem curto-circuito, falhando fechado                                                                                                   |
+| Arquivo                             | O que faz                                                                                                                                                                        |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/api.ts`                        | Entrypoint do processo **API**. Cria o servidor HTTP, escuta a porta e trata o encerramento gracioso                                                                             |
+| `src/worker.ts`                     | Entrypoint do processo **worker**. Consumirá as filas do BullMQ                                                                                                                  |
+| `src/dispatcher.ts`                 | Entrypoint do processo **dispatcher**. Varrerá o outbox e rodará as rotinas periódicas                                                                                           |
+| `src/app.ts`                        | Monta o Express: helmet, CORS com credenciais, log de requisição, parser JSON, `/health` e tratador de erros. **Não abre porta** — é o que permite testar sem servidor pendurado |
+| `src/infra/env.ts`                  | Valida as variáveis de ambiente com Zod na subida. O processo não inicia com variável faltando                                                                                   |
+| `src/infra/db.ts`                   | Cliente Prisma com adapter `pg`                                                                                                                                                  |
+| `src/infra/redis.ts`                | Cliente ioredis                                                                                                                                                                  |
+| `src/infra/logger.ts`               | Log estruturado com pino, com redaction de cookie, senha e token                                                                                                                 |
+| `src/infra/errors.ts`               | `AppError`, os erros nomeados e o middleware que traduz erro em resposta HTTP                                                                                                    |
+| `src/generated/`                    | Cliente Prisma **gerado**. Não versionado, não editar                                                                                                                            |
+| `tests/health.test.ts`              | Verifica que `GET /health` responde 200                                                                                                                                          |
+| `tests/errors.test.ts`              | Cobre os erros nomeados e o tratador, incluindo que a mensagem original do erro nao tratado nao vaza para o cliente                                                              |
+| `tests/restricoes-do-banco.test.ts` | Contra o Postgres real: confere os índices únicos parciais escritos à mão na migration inicial, que o `schema.prisma` não expressa                                               |
+| `scripts/quality-gate.ts`           | O portão de qualidade. Sete verificações, sem curto-circuito, falhando fechado                                                                                                   |
 
 ## Configuração
 
