@@ -99,31 +99,21 @@ As decisões de produto estão no `CLAUDE.md`. Aqui ficam as de configuração, 
 
 ## Próximo passo
 
-**Modelagem de dados:** escrever os models do `prisma/schema.prisma` e gerar a primeira migration.
-A proposta de modelo já está em [`docs/modelagem.md`](./docs/modelagem.md).
+**Modelagem de dados escrita.** O `prisma/schema.prisma` tem as 25 entidades e a migration
+`modelagem_inicial` foi aplicada no Postgres local. Decisões e presunções em
+[`docs/modelagem.md`](./docs/modelagem.md), racional nos ADRs 0024 a 0035.
 
-**Os três pontos que bloqueavam a migration foram decididos.** Valores em
-[`docs/proposta-listas-fechadas.md`](./docs/proposta-listas-fechadas.md), racional nos ADRs 0024 a
-0027:
+Falta, no mesmo PR: teste de integração que aplica a migration e confere as restrições que o Prisma
+não expressa — os três índices únicos parciais (solicitação pendente, pedido de acesso pendente,
+reunião ativa).
 
-- `Segmento` com 12 valores, sem `OUTRO`. A startup marca **no máximo 2**, o investidor marca quantos
-  quiser, e **um segmento em comum já vale a pontuação cheia** no score.
-- Faixas de capital e ticket como **par de números em centavos**, teto obrigatório, mínimo R$ 1.000.
-  O front exibe agrupado; a API devolve o inteiro.
-- **9 áreas** de expertise do mentor, cada uma com **anos de experiência**. Como é autodeclaração, a
-  moderação confere contra o LinkedIn até a terceira avaliação; a partir dela, a nota das startups
-  substitui o declarado.
-
-Duas decisões que vieram junto e mudam o que já estava escrito: **o perfil do investidor é visível às
-startups** (a nota dele continua só para o administrador), e **a moderação passa a ter critérios
-próprios por tipo de conta**, incluindo `PESSOA`.
-
-Com isso, o schema está destravado: escrever os models do `prisma/schema.prisma` e gerar a primeira
-migration.
+Os valores de negócio que continuam em aberto não bloqueiam o schema, mas bloqueiam a regra
+correspondente. A lista está no fim da `docs/modelagem.md`.
 
 Em paralelo, duas coisas de primeira semana que não dependem de código:
 
-- Rebuild do devcontainer e `docker compose up` funcionando.
+- `docker compose up` do perfil `app` (API, worker e dispatcher). Os serviços `postgres` e `redis`
+  já sobem e foram usados para gerar a migration.
 - Validar o fluxo de cookie entre domínios ([ADR 0015](./docs/adr/0015-cookie-entre-dominios-distintos.md)) —
   é o que se disfarça de bug de autenticação se for descoberto só na integração final.
 

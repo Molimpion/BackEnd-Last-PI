@@ -16,21 +16,20 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 
 ## Documentação
 
-| Arquivo                            | O que é                                                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `Projeto_Matchmaking.md`           | Requisitos, personas, arquitetura e racional. Fonte da verdade sobre **o que** o sistema faz                 |
-| `CLAUDE.md`                        | Convenções de código, fronteira de camadas e o que não se decide sozinho. Lido por pessoas e por IAs         |
-| `CONTEXT.md`                       | Estado atual, decisões de configuração e próximo passo. A seção "Onde estamos" é do responsável técnico      |
-| `CONTRIBUTING.md`                  | Fluxo de branches, padrão de commit e checklist de PR                                                        |
-| `CHANGELOG.md`                     | Histórico de mudanças. **Só o responsável técnico edita**                                                    |
-| `README.md`                        | Como executar o projeto                                                                                      |
-| `docs/sumario.md`                  | Este arquivo                                                                                                 |
-| `docs/modelagem.md`                | Modelo de dados decidido, com o ADR de cada decisão e os valores de negócio ainda em aberto                  |
-| `docs/proposta-listas-fechadas.md` | Os valores decididos para os três bloqueantes, para consulta rápida. Some quando os enums entrarem no schema |
-| `docs/perguntas-frequentes.md`     | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                       |
-| `docs/adr/README.md`               | Índice dos ADRs, agrupado por tema                                                                           |
-| `docs/adr/0001` a `0035`           | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                          |
-| `LICENSE`                          | Licença MIT                                                                                                  |
+| Arquivo                        | O que é                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `Projeto_Matchmaking.md`       | Requisitos, personas, arquitetura e racional. Fonte da verdade sobre **o que** o sistema faz            |
+| `CLAUDE.md`                    | Convenções de código, fronteira de camadas e o que não se decide sozinho. Lido por pessoas e por IAs    |
+| `CONTEXT.md`                   | Estado atual, decisões de configuração e próximo passo. A seção "Onde estamos" é do responsável técnico |
+| `CONTRIBUTING.md`              | Fluxo de branches, padrão de commit e checklist de PR                                                   |
+| `CHANGELOG.md`                 | Histórico de mudanças. **Só o responsável técnico edita**                                               |
+| `README.md`                    | Como executar o projeto                                                                                 |
+| `docs/sumario.md`              | Este arquivo                                                                                            |
+| `docs/modelagem.md`            | Modelo de dados decidido, com o ADR de cada decisão e os valores de negócio ainda em aberto             |
+| `docs/perguntas-frequentes.md` | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                  |
+| `docs/adr/README.md`           | Índice dos ADRs, agrupado por tema                                                                      |
+| `docs/adr/0001` a `0035`       | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                     |
+| `LICENSE`                      | Licença MIT                                                                                             |
 
 ## Código
 
@@ -68,7 +67,8 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 | `.husky/pre-commit`                    | Roda formatação e tipos antes do commit                               |
 | `.husky/commit-msg`                    | Roda o commitlint na mensagem                                         |
 | `.env.example`                         | Todas as variáveis necessárias, sem nenhum valor real                 |
-| `prisma/schema.prisma`                 | Modelo de dados. Ainda sem nenhum model                               |
+| `prisma/schema.prisma`                 | Modelo de dados: enums e as 25 entidades. Ver `docs/modelagem.md`     |
+| `prisma/migrations/`                   | Migrations. A inicial tem índices parciais escritos à mão no SQL      |
 | `prisma.config.ts`                     | Configuração do Prisma 7, incluindo a URL do banco                    |
 
 ## Infraestrutura e CI
