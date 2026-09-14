@@ -1,71 +1,22 @@
-# Proposta — as três listas fechadas que bloqueiam a primeira migration
+# As três listas fechadas — decididas
 
-**Status:** os três itens estão **decididos** e registrados em ADR. Este arquivo será apagado assim
-que os enums entrarem no `prisma/schema.prisma`.
+**Status:** decidido. Este arquivo será apagado assim que os enums entrarem no
+`prisma/schema.prisma`.
 
-| Decisão                                              | Onde vive agora                                                          |
-| ---------------------------------------------------- | ------------------------------------------------------------------------ |
-| Sobreposição de segmentos no score                   | [ADR 0026](./adr/0026-sobreposicao-de-segmentos-no-score.md)             |
-| Valor em centavos, exibido como faixa                | [ADR 0027](./adr/0027-valor-monetario-em-centavos-exibido-como-faixa.md) |
-| Nota do mentor pública, credibilidade em duas etapas | [ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)                       |
-| Critérios de moderação por tipo de conta             | [ADR 0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md)       |
+Eram os três pontos que bloqueavam a primeira migration: o `Projeto_Matchmaking.md` os exige mas não
+define. O racional de cada um está no ADR correspondente — aqui ficam só os valores, para consulta
+rápida enquanto o schema não existe.
 
-## Decidido
-
-**1. Segmento.** Os 12 valores propostos abaixo. A startup pode marcar **mais de um, no máximo 2** —
-o limite existe para ninguém marcar tudo e aparecer em toda busca. Não existe `OUTRO`. Consequência:
-o score deixa de ser "igual ou diferente" e passa a medir sobreposição entre os conjuntos, o que
-precisa entrar na definição dos pesos.
-
-**2. Faixas de capital e ticket.** **Par de números**, guardado em centavos como inteiro.
-
-- O **teto é obrigatório** — ninguém deixa em branco. Evita caso especial na regra do score, ao
-  custo de obrigar quem não tem limite a declarar um valor alto.
-- **Valor mínimo aceito: R$ 1.000.** Barra cadastro de teste e erro de digitação.
-- A explicação no cartão mostra **se o ticket está acima ou abaixo** do que a outra parte busca,
-  visível para os dois lados.
-
-**Acréscimo relacionado:** o perfil do investidor é visível às startups, não só o contrário. Sem
-isso, a descoberta funcionaria em um sentido só. Registrado em
-[`modelagem.md`](./modelagem.md) e em [ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md).
-
-**3. Expertise do mentor.** As 9 áreas propostas abaixo, **sem `OPERACOES`** — era o valor mais vago
-e tenderia a virar caixa-de-tudo. Múltipla escolha, e cada área carrega **anos de experiência**, não
-um rótulo como "avançado": ano é fato conferível contra o LinkedIn, rótulo é opinião.
-
-Como anos de experiência é autodeclaração, a credibilidade vem em duas etapas:
-
-- **Até a terceira avaliação**, vale o declarado, conferido pela moderação contra o LinkedIn
-  ([ADR 0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md)).
-- **A partir da terceira**, a nota recebida das startups substitui a autoclassificação
-  ([ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)).
-- No cartão aparece **um** dos dois; no perfil expandido, os dois.
-
-Consequência de modelagem: área com nível deixa de ser lista simples e vira **tabela própria** — uma
-linha por área do mentor, com a área e os anos.
-
-O texto original de cada item fica abaixo, com o racional que levou à decisão.
-
-Os três pontos abaixo são exigidos pelo `Projeto_Matchmaking.md` mas não definidos por ele. Nenhum é
-escolha de quem implementa: eles determinam o que o usuário **pode** dizer sobre si e o que o motor
-de afinidade consegue cruzar. Uma vez na migration, mudar exige outra migration — e migração de dado,
-se já houver cadastro.
-
-Este documento traz valores concretos para acelerar a discussão. Leve ao grupo como
-"concordo / troco isso / falta aquilo". Depois de decidido, cada item vira ADR e este arquivo é
-apagado.
+| Decisão                                              | ADR                                                                  |
+| ---------------------------------------------------- | -------------------------------------------------------------------- |
+| Sobreposição de segmentos no score                   | [0026](./adr/0026-sobreposicao-de-segmentos-no-score.md)             |
+| Valor monetário em centavos, exibido como faixa      | [0027](./adr/0027-valor-monetario-em-centavos-exibido-como-faixa.md) |
+| Nota do mentor pública, credibilidade em duas etapas | [0024](./adr/0024-nota-do-mentor-e-publica.md)                       |
+| Critérios de moderação por tipo de conta             | [0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md)       |
 
 ---
 
-## 1. Valores do enum `Segmento`
-
-**Exigido por:** RF01 (obrigatório, lista fechada), RF02 (segmentos de interesse do investidor),
-RF03 (entra no cálculo do score).
-
-**O que o documento diz:** cita Fintech, Healthtech, Agrotech, Edtech, Retailtech "e demais". "E
-demais" não é um enum.
-
-### Proposta — 12 valores
+## 1. `Segmento` — 12 valores
 
 ```
 FINTECH           HRTECH            GOVTECH
@@ -74,120 +25,72 @@ EDTECH            MARTECH           ECONOMIA_CRIATIVA
 AGROTECH          LOGTECH           RETAILTECH
 ```
 
-**Por que 12 e não os 5 do documento.** Os cinco citados cobrem o óbvio e deixam de fora setores com
-presença real no ecossistema. Lista curta demais empurra a startup para o valor mais próximo, e o
-score passa a cruzar segmentos que não se parecem.
+- Não existe `OUTRO`. O motor não consegue cruzar `OUTRO` com `OUTRO`.
+- A startup marca **no máximo 2**. O limite impede marcar tudo para aparecer em toda busca.
+- O investidor marca **quantos quiser** — tese ampla é legítima.
+- No score, **um segmento em comum já vale a pontuação cheia** ([ADR 0026](./adr/0026-sobreposicao-de-segmentos-no-score.md)).
 
-**Por que `ECONOMIA_CRIATIVA` entra.** É o tema do projeto integrador e o Porto Digital tem polo
-dedicado. Deixar de fora seria contraditório com o contexto declarado na seção 1.
+**Não decidido, e deliberadamente adiado:** se falta algum setor forte do Porto Digital na lista.
+Acrescentar valor depois é migration, e o grupo preferiu não travar por isso.
 
-**Por que não existe `OUTRO`.** O motor de afinidade não consegue cruzar `OUTRO` com `OUTRO`: duas
-startups sem nada em comum teriam compatibilidade máxima de segmento. Se a lista precisar crescer,
-cresce por migration — que é rastreável e revisável, ao contrário de um campo-lixo.
+## 2. Faixa de capital buscado e de ticket
 
-### Em aberto para o grupo
+Par de números (`minimo`, `maximo`), guardado em **centavos como inteiro**.
 
-- `LOGTECH` e `CONSTRUTECH` têm presença suficiente no Recife para justificar? Vocês conhecem o
-  ecossistema melhor que eu.
-- Uma startup pode ter **mais de um** segmento? A modelagem atual assume um só. Permitir vários
-  muda o cálculo do score de igualdade para interseção.
-- Falta algum setor forte do Porto Digital nesta lista?
+- **Teto obrigatório** — ninguém deixa em branco.
+- **Mínimo aceito: R$ 1.000.**
+- Há compatibilidade quando os intervalos **se sobrepõem em qualquer ponto**.
+- O cartão indica se o ticket está **acima ou abaixo**, visível aos dois lados.
+- O front exibe agrupado: `R$ 100 mil – R$ 500 mil`. A API devolve o inteiro, nunca string
+  formatada.
 
----
+Detalhes em [ADR 0027](./adr/0027-valor-monetario-em-centavos-exibido-como-faixa.md).
 
-## 2. Formato das faixas de capital buscado e de ticket
-
-**Exigido por:** RF01 (faixa de capital buscado da startup), RF02 (faixa de ticket do investidor),
-RF03 (o score cruza as duas e precisa justificar em linguagem natural).
-
-**O que o documento diz:** "faixa", sem definir o formato.
-
-### As duas modelagens possíveis
-
-|                        | Enum de intervalos nomeados     | Par de números (`minimo`, `maximo`) |
-| ---------------------- | ------------------------------- | ----------------------------------- |
-| Como fica              | `ATE_50K`, `DE_50K_A_200K`, …   | `minimo: 50000, maximo: 200000`     |
-| Preencher              | Escolhe numa lista, rápido      | Digita dois valores                 |
-| Comparar               | Igualdade ou vizinhança de enum | Interseção real de intervalos       |
-| Justificativa do RF03  | "faixa adjacente à sua"         | "ticket 20% acima da sua faixa"     |
-| Dado inconsistente     | Impossível                      | Possível (`minimo > maximo`)        |
-| Mudar as faixas depois | Migration + migração de dado    | Não precisa                         |
-
-### Proposta — par de números
-
-`minimo` e `maximo` em **centavos de real**, como inteiro.
-
-**Por que par de números.** O RF03 exige justificativa em linguagem natural e dá como exemplo
-literal "ticket 20% acima da sua faixa". Esse "20%" **não é calculável a partir de enum** — com
-intervalos nomeados, o máximo que se consegue dizer é "faixa adjacente". A decisão de formato é, na
-prática, a decisão de quão específica a justificativa pode ser.
-
-**Por que centavos e não reais com decimal.** Ponto flutuante em dinheiro acumula erro. Inteiro em
-centavos é a prática padrão e evita a discussão.
-
-**Por que inteiro e não `Decimal` do Prisma.** `Decimal` seria mais correto para valores monetários
-arbitrários, mas traz um tipo que atravessa serialização com atrito. Para faixa de investimento,
-centavos em inteiro basta — o maior valor plausível cabe com folga.
-
-**Regra de compatibilidade proposta:** há compatibilidade quando os intervalos se sobrepõem em
-qualquer ponto. O score cresce conforme a sobreposição é maior.
-
-### Em aberto para o grupo
-
-- **`maximo` pode ser nulo?** Investidor sem teto declarado é caso real. Nulo significa "sem limite"
-  — e isso precisa estar na regra do score, não implícito.
-- **Existe faixa mínima de entrada?** Uma startup pedindo R$ 500 provavelmente é cadastro de teste.
-- **A interface mostra os números ou faixas?** Dá para guardar número e **exibir** como faixa, tendo
-  o melhor dos dois. Mas isso é decisão de front, e precisa ser combinada.
-
----
-
-## 3. Áreas de expertise do mentor
-
-**Exigido por:** RF02 (bloco do papel `MENTOR`).
-
-**O que o documento diz:** "áreas de expertise", sem definir se é lista ou texto.
-
-**Por que isso não pode ser texto livre.** Três pessoas escrevem "produto", "product management" e
-"PM" para a mesma coisa, e o matchmaking não cruza nenhuma delas. É o mesmo motivo pelo qual o RF01
-exige lista fechada para segmento.
-
-### Proposta — 10 valores, múltipla escolha
+## 3. Áreas de expertise do mentor — 9 valores
 
 ```
-PRODUTO              VENDAS_E_GO_TO_MARKET     JURIDICO_E_SOCIETARIO
-TECNOLOGIA           MARKETING                 CAPTACAO_E_INVESTIMENTO
-DESIGN_E_UX          FINANCAS                  PESSOAS_E_CULTURA
-                     OPERACOES
+PRODUTO                  MARKETING                  PESSOAS_E_CULTURA
+TECNOLOGIA               FINANCAS                   JURIDICO_E_SOCIETARIO
+DESIGN_E_UX              VENDAS_E_GO_TO_MARKET      CAPTACAO_E_INVESTIMENTO
 ```
 
-**Por que múltipla escolha, diferente de segmento.** Startup é de um setor; mentor acumula
-experiências. Restringir a uma área só empobreceria o perfil de quem tem mais a oferecer.
+- Múltipla escolha, e cada área carrega **anos de experiência** — não um rótulo como "avançado".
+  Ano é conferível contra o LinkedIn; rótulo é opinião.
+- `OPERACOES` foi cortado da proposta original por ser vago o bastante para virar caixa-de-tudo.
+- `CAPTACAO_E_INVESTIMENTO` é área de mentoria, não o mesmo que ter o papel `INVESTIDOR`: ensinar a
+  captar não é aportar.
 
-**Por que estas dez.** Cobrem as dores declaradas nas personas — Mariana tem dificuldade de traduzir
-métricas técnicas para o mercado (`VENDAS_E_GO_TO_MARKET`, `MARKETING`), teme expor números
-(`JURIDICO_E_SOCIETARIO`), e precisa de validação de mercado (`PRODUTO`). Carlos cita receio quanto
-à governança jurídica dos fundadores, que é a mesma área.
+**Credibilidade em duas etapas**, porque anos de experiência é autodeclaração:
 
-**Por que `CAPTACAO_E_INVESTIMENTO` é área de mentoria, e não o mesmo que ser investidor.** São
-papéis distintos (seção 3.1): ensinar a captar não é aportar. Uma pessoa pode ter só o papel
-`MENTOR` e ainda assim ser quem melhor orienta sobre rodadas.
+1. **Até a terceira avaliação** — vale o declarado, conferido pela moderação contra o LinkedIn
+   ([ADR 0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md)).
+2. **A partir da terceira** — a nota das startups substitui a autoclassificação
+   ([ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)).
 
-### Em aberto para o grupo
+No cartão aparece **um** dos dois; no perfil expandido, os dois.
 
-- Dez é demais para um formulário de cadastro? A dúvida 2 da matriz CSD é exatamente sobre quantas
-  etapas Mariana aguenta antes de abandonar.
-- O mentor declara **nível** de experiência por área, ou só marca a área?
-- `OPERACOES` é vago o suficiente para virar caixa-de-tudo?
+**Consequência de modelagem:** área com anos deixa de ser lista simples e vira tabela própria — uma
+linha por área do mentor.
 
 ---
 
-## O que acontece depois da decisão
+## Acréscimo ao documento: o perfil do investidor é público
 
-1. Cada um dos três vira ADR, com o que foi recusado e por quê.
-2. Os enums entram em `prisma/schema.prisma` e a `docs/modelagem.md` deixa de estar bloqueada.
-3. Este arquivo é apagado — proposta decidida não fica no repositório concorrendo com o ADR.
+O RF04 define o perfil público apenas da startup. Decisão tomada: o perfil do investidor — tese,
+segmentos e estágios de interesse, faixa de ticket e modelo preferido — também é visível às
+startups. Sem isso a descoberta funcionaria em um sentido só e o RF15 não teria o que buscar.
 
-Os outros cinco pontos em aberto da `docs/modelagem.md` (pesos do score, cotas, preços, janela de
-tolerância, critérios do feedback) **não bloqueiam a migration** — eles permitem escrever o schema,
-mas não implementar a regra correspondente.
+A **nota** do investidor continua restrita ao administrador
+([ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md)).
+
+## O que continua em aberto
+
+Estes não bloqueiam a migration — permitem escrever o schema, mas não implementar a regra:
+
+| O que falta                                                        | Requisito |
+| ------------------------------------------------------------------ | --------- |
+| Pesos do score e valor do limiar, incluindo quanto vale o segmento | RF03      |
+| Cotas por plano e preços                                           | RF17      |
+| Prazo da janela de tolerância por inadimplência                    | RF17      |
+| Se o cancelamento é permitido durante inadimplência                | RF17      |
+| Escala e critérios da nota do feedback                             | RF10      |

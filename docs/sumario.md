@@ -16,21 +16,21 @@ O que cada arquivo faz. Arquivo novo entra aqui no mesmo PR que o cria.
 
 ## Documentação
 
-| Arquivo                            | O que é                                                                                                 |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `Projeto_Matchmaking.md`           | Requisitos, personas, arquitetura e racional. Fonte da verdade sobre **o que** o sistema faz            |
-| `CLAUDE.md`                        | Convenções de código, fronteira de camadas e o que não se decide sozinho. Lido por pessoas e por IAs    |
-| `CONTEXT.md`                       | Estado atual, decisões de configuração e próximo passo. A seção "Onde estamos" é do responsável técnico |
-| `CONTRIBUTING.md`                  | Fluxo de branches, padrão de commit e checklist de PR                                                   |
-| `CHANGELOG.md`                     | Histórico de mudanças. **Só o responsável técnico edita**                                               |
-| `README.md`                        | Como executar o projeto                                                                                 |
-| `docs/sumario.md`                  | Este arquivo                                                                                            |
-| `docs/modelagem.md`                | Modelo de dados proposto e os oito pontos em aberto, três dos quais bloqueiam a primeira migration      |
-| `docs/proposta-listas-fechadas.md` | Valores propostos para os três bloqueantes, aguardando decisão do grupo. Some depois de virar ADR       |
-| `docs/perguntas-frequentes.md`     | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                  |
-| `docs/adr/README.md`               | Índice dos ADRs, agrupado por tema                                                                      |
-| `docs/adr/0001` a `0023`           | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                     |
-| `LICENSE`                          | Licença MIT                                                                                             |
+| Arquivo                            | O que é                                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `Projeto_Matchmaking.md`           | Requisitos, personas, arquitetura e racional. Fonte da verdade sobre **o que** o sistema faz                 |
+| `CLAUDE.md`                        | Convenções de código, fronteira de camadas e o que não se decide sozinho. Lido por pessoas e por IAs         |
+| `CONTEXT.md`                       | Estado atual, decisões de configuração e próximo passo. A seção "Onde estamos" é do responsável técnico      |
+| `CONTRIBUTING.md`                  | Fluxo de branches, padrão de commit e checklist de PR                                                        |
+| `CHANGELOG.md`                     | Histórico de mudanças. **Só o responsável técnico edita**                                                    |
+| `README.md`                        | Como executar o projeto                                                                                      |
+| `docs/sumario.md`                  | Este arquivo                                                                                                 |
+| `docs/modelagem.md`                | Modelo de dados proposto e os oito pontos em aberto, três dos quais bloqueiam a primeira migration           |
+| `docs/proposta-listas-fechadas.md` | Os valores decididos para os três bloqueantes, para consulta rápida. Some quando os enums entrarem no schema |
+| `docs/perguntas-frequentes.md`     | Dúvidas recorrentes sobre a configuração, com o motivo de cada escolha                                       |
+| `docs/adr/README.md`               | Índice dos ADRs, agrupado por tema                                                                           |
+| `docs/adr/0001` a `0023`           | Uma decisão arquitetural por arquivo, com as alternativas recusadas                                          |
+| `LICENSE`                          | Licença MIT                                                                                                  |
 
 ## Código
 
