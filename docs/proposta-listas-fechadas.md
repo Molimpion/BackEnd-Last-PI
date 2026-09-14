@@ -1,6 +1,27 @@
 # Proposta — as três listas fechadas que bloqueiam a primeira migration
 
-**Status:** proposta, aguardando decisão do grupo.
+**Status:** itens 1 e 2 **decididos**. Item 3 aberto.
+
+## Decidido
+
+**1. Segmento.** Os 12 valores propostos abaixo. A startup pode marcar **mais de um, no máximo 2** —
+o limite existe para ninguém marcar tudo e aparecer em toda busca. Não existe `OUTRO`. Consequência:
+o score deixa de ser "igual ou diferente" e passa a medir sobreposição entre os conjuntos, o que
+precisa entrar na definição dos pesos.
+
+**2. Faixas de capital e ticket.** **Par de números**, guardado em centavos como inteiro.
+
+- O **teto é obrigatório** — ninguém deixa em branco. Evita caso especial na regra do score, ao
+  custo de obrigar quem não tem limite a declarar um valor alto.
+- **Valor mínimo aceito: R$ 1.000.** Barra cadastro de teste e erro de digitação.
+- A explicação no cartão mostra **se o ticket está acima ou abaixo** do que a outra parte busca,
+  visível para os dois lados.
+
+**Acréscimo relacionado:** o perfil do investidor é visível às startups, não só o contrário. Sem
+isso, a descoberta funcionaria em um sentido só. Registrado em
+[`modelagem.md`](./modelagem.md) e em [ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md).
+
+O texto original de cada item fica abaixo, com o racional que levou à decisão.
 
 Os três pontos abaixo são exigidos pelo `Projeto_Matchmaking.md` mas não definidos por ele. Nenhum é
 escolha de quem implementa: eles determinam o que o usuário **pode** dizer sobre si e o que o motor

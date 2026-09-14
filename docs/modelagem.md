@@ -136,6 +136,19 @@ O score do RF03 é **determinístico e calculado sob demanda** — ver
 [ADR 0003](./adr/0003-score-deterministico.md). Não existe tabela de match materializada: o score é
 função dos perfis, e perfil muda.
 
+### Visibilidade dos dois lados — acréscimo ao documento
+
+O RF04 define o perfil público **apenas da startup** e silencia sobre o investidor. Decisão tomada:
+**o perfil do investidor também é visível às startups** — tese, segmentos e estágios de interesse,
+faixa de ticket e modelo preferido.
+
+Sem isso a descoberta funcionaria em um sentido só, e o RF15 (busca e filtro manual) não teria o que
+a startup buscar.
+
+Não conflita com o [ADR 0012](./adr/0012-visibilidade-assimetrica-do-feedback.md): o que continua
+restrito ao administrador é a **nota** do investidor, não o perfil dele. Declarar a própria tese não
+afasta ninguém; ter a própria avaliação exposta, sim.
+
 ### `VisualizacaoDePerfil` — RF09
 
 Registra que um investidor viu o cartão de uma startup. É o insumo da métrica "quantos investidores

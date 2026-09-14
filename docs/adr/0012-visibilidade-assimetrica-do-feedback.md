@@ -52,6 +52,11 @@ marca reunião e não aparece.
   front público.
 - É uma decisão de produto, não técnica: se a dinâmica do marketplace mudar — investidores deixarem
   de ser o lado escasso — ela deve ser reavaliada.
+- **A assimetria vale para a nota, não para o perfil.** O perfil do investidor — tese, segmentos de
+  interesse, estágios e faixa de ticket — é visível à startup, porque sem isso ela não teria o que
+  buscar no RF15 e a descoberta só funcionaria num sentido. O que este ADR protege é a **avaliação
+  recebida**, que é juízo de terceiro sobre a pessoa. Declarar a própria tese não afasta ninguém;
+  ter a própria nota exposta, sim.
 
 **Pendente:** os critérios e a escala da avaliação não foram definidos. É a dúvida 3 da matriz CSD, a
 resolver na rodada beta (RNF04).
