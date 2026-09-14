@@ -8,15 +8,17 @@ não foi construído da forma óbvia.
 
 ## Produto
 
-| #                                                            | Decisão                                                     | Status                               |
-| ------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------ |
-| [0009](./0009-plataforma-de-conexao-nao-de-intermediacao.md) | Plataforma de conexão, não de intermediação de investimento | Aceito                               |
-| [0010](./0010-tipo-de-conta-e-papeis-acumulaveis.md)         | Tipo de conta exclusivo com papéis acumuláveis              | Aceito                               |
-| [0003](./0003-score-deterministico.md)                       | Score de afinidade determinístico                           | Aceito                               |
-| [0004](./0004-cota-com-devolucao.md)                         | Cota de solicitações com devolução                          | Aceito                               |
-| [0012](./0012-visibilidade-assimetrica-do-feedback.md)       | Visibilidade assimétrica do feedback                        | Aceito — parte substituída pelo 0024 |
-| [0024](./0024-nota-do-mentor-e-publica.md)                   | A nota do mentor é pública; a do investidor não             | Aceito                               |
-| [0013](./0013-reativacao-sem-nova-cobranca.md)               | Reativação dentro do período vigente, sem cobrança          | Aceito                               |
+| #                                                                | Decisão                                                     | Status                               |
+| ---------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| [0009](./0009-plataforma-de-conexao-nao-de-intermediacao.md)     | Plataforma de conexão, não de intermediação de investimento | Aceito                               |
+| [0010](./0010-tipo-de-conta-e-papeis-acumulaveis.md)             | Tipo de conta exclusivo com papéis acumuláveis              | Aceito                               |
+| [0003](./0003-score-deterministico.md)                           | Score de afinidade determinístico                           | Aceito                               |
+| [0004](./0004-cota-com-devolucao.md)                             | Cota de solicitações com devolução                          | Aceito                               |
+| [0012](./0012-visibilidade-assimetrica-do-feedback.md)           | Visibilidade assimétrica do feedback                        | Aceito — parte substituída pelo 0024 |
+| [0024](./0024-nota-do-mentor-e-publica.md)                       | A nota do mentor é pública; a do investidor não             | Aceito                               |
+| [0013](./0013-reativacao-sem-nova-cobranca.md)                   | Reativação dentro do período vigente, sem cobrança          | Aceito                               |
+| [0026](./0026-sobreposicao-de-segmentos-no-score.md)             | Sobreposição de segmentos no score é tudo ou nada           | Aceito                               |
+| [0027](./0027-valor-monetario-em-centavos-exibido-como-faixa.md) | Valor monetário em centavos, exibido como faixa             | Aceito                               |
 
 ## Segurança, privacidade e governança
 

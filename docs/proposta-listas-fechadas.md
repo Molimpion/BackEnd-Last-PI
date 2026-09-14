@@ -1,7 +1,14 @@
 # Proposta — as três listas fechadas que bloqueiam a primeira migration
 
-**Status:** os três itens estão **decididos**. Este arquivo será apagado assim que os enums entrarem
-no `prisma/schema.prisma`.
+**Status:** os três itens estão **decididos** e registrados em ADR. Este arquivo será apagado assim
+que os enums entrarem no `prisma/schema.prisma`.
+
+| Decisão                                              | Onde vive agora                                                          |
+| ---------------------------------------------------- | ------------------------------------------------------------------------ |
+| Sobreposição de segmentos no score                   | [ADR 0026](./adr/0026-sobreposicao-de-segmentos-no-score.md)             |
+| Valor em centavos, exibido como faixa                | [ADR 0027](./adr/0027-valor-monetario-em-centavos-exibido-como-faixa.md) |
+| Nota do mentor pública, credibilidade em duas etapas | [ADR 0024](./adr/0024-nota-do-mentor-e-publica.md)                       |
+| Critérios de moderação por tipo de conta             | [ADR 0025](./adr/0025-criterios-de-moderacao-por-tipo-de-conta.md)       |
 
 ## Decidido
 
